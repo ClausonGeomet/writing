@@ -1,0 +1,34 @@
+/*-- scss:defaults --*/
+$body-color: #24313d;
+$headings-color: #17222c;
+$link-color: #0d5b78;
+$link-hover-color: #083f54;
+$font-family-sans-serif: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+$font-family-monospace: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+/*-- scss:rules --*/
+body {
+  line-height: 1.65;
+}
+
+#title-block-header {
+  margin-bottom: 2rem;
+}
+
+.quarto-title-meta-heading {
+  color: $link-color;
+}
+
+.listing-title a {
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.12em;
+}
+
+.quarto-listing-category {
+  border-radius: 0.2rem;
+  font-size: 0.85rem;
+}
+
+pre {
+  border-radius: 0.25rem;
+}

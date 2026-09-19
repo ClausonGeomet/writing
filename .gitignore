@@ -1,0 +1,30 @@
+# Local Python environments and interpreter artefacts
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Quarto/Jupyter render caches and generated output
+.quarto/
+_site/
+.jupyter/
+
+# Local editor and operating-system state
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets and machine-specific configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# Designated non-public inputs
+data/private/
+private/

@@ -1,0 +1,30 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - index.qmd
+    - posts/*/index.qmd
+    - "!drafts/**"
+  resources:
+    - posts/**/rendered-report.html
+
+website:
+  title: "Writing"
+  description: "Notes on geometallurgy, mineral inference, and defensible technical decisions."
+  site-url: "https://clausongeomet.github.io/writing/"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Writing
+    right:
+      - icon: rss
+        href: index.xml
+        aria-label: RSS feed
+  page-footer:
+    left: "© 2026 Matt Clauson · CC BY 4.0"
+
+format:
+  html:
+    theme: [cosmo, styles.scss]
+    toc: true
+    link-external-newwindow: true

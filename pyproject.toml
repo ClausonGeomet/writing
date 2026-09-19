@@ -1,0 +1,20 @@
+[project]
+name = "clausongeomet-writing"
+version = "0.1.0"
+description = "Reproducible execution environment for the Writing Quarto site"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "ipython>=8.0",
+  "jupyter>=1.0",
+  "numpy>=1.26",
+  "pandas>=2.0",
+  "plotnine>=0.14",
+  "scipy>=1.11",
+]
+
+[dependency-groups]
+dev = []
+
+[tool.uv]
+package = false

@@ -1,0 +1,12 @@
+---
+title: "Writing"
+description: "Notes on geometallurgy, mineral inference, and defensible technical decisions."
+listing:
+  contents: posts/*/index.qmd
+  type: default
+  sort: "date desc"
+  categories: true
+  feed: true
+---
+
+Essays and practical notes on turning technical evidence into decisions that can be inspected and defended.

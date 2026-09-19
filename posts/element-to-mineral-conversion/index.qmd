@@ -1,0 +1,1231 @@
+---
+title: "From elements to minerals: what an assay can tell us"
+subtitle: "A consultancy case study in mass balance, ambiguity and defensible decisions"
+date: 2026-09-07
+lang: en-AU
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    embed-resources: true
+    code-fold: true
+jupyter: python3
+execute:
+  echo: true
+  warning: true
+  error: true
+  cache: false
+---
+
+~~~{=html}
+<style>
+main .figure-img { max-width: 100%; height: auto; }
+main .math.display { display: block; max-width: 100%; overflow-x: auto; }
+.table-scroll, .cell-output-display { max-width: 100%; overflow-x: auto; }
+.table-scroll.wide table { min-width: 640px; }
+.table-scroll:focus { outline: 2px solid #0072B2; outline-offset: 2px; }
+.cell-output-stdout pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+</style>
+~~~
+
+## Problem Statement
+
+Mine planning and geometallurgical decisions often need mineralogical information, while routine
+bulk assays are usually cheaper, denser and easier to collect than quantitative mineralogy. That
+gap is why element-to-mineral conversion (EMC) is appealing: could a standard XRF assay suite tell
+us enough about mineral modes to make the next decision?
+
+Sometimes it can, but not by calculation alone. EMC combines the assay with a declared mineral
+list, mineral chemistry and rules such as non-negativity or closure. Different mineral mixtures
+can give the same bulk chemistry. And an assay does not reveal texture, liberation, oxidation
+state or process response. So a neat numerical output is not automatically a measured mineral
+mode.
+
+This article works through what the assay can identify, what it leaves unresolved, and which extra
+measurement would actually help. It starts with a little EMC history and uses one invented mixture
+to make the ideas visible. The goal is not a universal conversion formula. It is an auditable
+answer: what is recoverable, what is still ambiguous, how much residual is left, and what to
+measure next.
+
+## Can routine chemistry support a mineral decision?
+
+The mineral hosting an element can matter to separation and treatment, but a bulk assay alone does
+not predict liberation, recovery or plant performance. The practical question is therefore not
+whether EMC can return numbers, but whether the distinctions it can recover are enough for the
+next decision.
+
+An **assay** is a chemical measurement. **Mineral modes** are phase proportions; a **weight fraction** is a phase's mass divided by total sample mass. Thus 0.25 means 25 wt%, or 25 g in a 100 g sample. Element-to-mineral conversion (**EMC**) estimates modes by matching chemical contributions from a declared mineral list. It is a model-based, or *normative*, allocation. Measured reference mineralogy has measurement error and grouping choices of its own.
+
+This article follows one wholly invented mixture through forward calculation, ambiguity,
+optimisation, search, labels and Bayesian updating. The recurring question is: **which parts of
+the answer come from measurements, and which come from assumptions?**
+
+## A brief history of element-to-mineral conversion
+
+EMC is not a new trick. A few landmarks are useful here because they point to the same practical
+caution: a good fit is not necessarily a unique mineralogical answer.
+
+**Start with simultaneous equations, then admit the chemistry can move (1985).** Johnson, Chu and
+Hussey (1985) used simultaneous linear equations to estimate clay-mineral proportions from
+chemical and physical properties. Their workflow identified candidate minerals, measured the
+properties, bounded plausible component values, checked residuals and iterated. The lesson still
+matters: mineral proportions and the coefficients used to estimate them can both be uncertain, so
+a small residual is not proof that one mineral split is right.
+
+**Whiten (2008)** expressed the calculation as
+
+$$
+a = Cm,
+$$
+
+and used singular-value decomposition and the pseudoinverse to show the whole family of solutions.
+The null space makes the limitation plain: if the assay cannot tell two candidate minerals apart,
+an exact fit can still leave their split unresolved. Closure, ratios and similar constraints choose
+within that family. They do not put chemical information back into the assay.
+
+**Bring in QXRD and calibration (2011--2015).** Berry, Hunt and McKnight (2011) treated EMC as a
+practical bulk-mineralogy tool: sparse QXRD can calibrate linear-programming preferences, while
+assay and QXRD information can be combined by error-weighted non-negative least squares. Their
+warning is just as useful as the method: results depend on the mineral list, mineral chemistry and
+assay coverage; direct H2O and CO2 measurements, or LOI when those are unavailable, can make a
+real difference. Parian *et al.* (2015) used quantitative Rietveld XRD to organise sequential EMC
+and constrained non-negative factorisation for iron-ore and process samples. That improved a
+deposit-specific workflow. It did not produce a response matrix or weighting scheme that can be
+lifted unchanged into every deposit.
+
+**Build operational models, then make uncertainty explicit (2018--2023).** Mena Silva *et al.*
+(2018) compared least-squares and regression-based EMC against XRD for the Nabbaren
+nepheline-syenite deposit. The regression mapping did better there, but it learned a particular
+mineral system rather than a general conversion. Rodrigues *et al.* (2023) point toward Bayesian
+modal-mineralogy approximation from assays. The available conference abstract supports that broad
+direction, but not a detailed claim about its likelihood, priors or validation.
+
+The pattern across this history is simple. EMC becomes more useful when it is treated as a
+constrained, deposit-specific inference problem and paired with independent mineralogical or
+mineral-chemistry measurements. It is a poor substitute when the decision rests on mineral
+distinctions that bulk chemistry has already lost.
+
+## One invented mixture, first forwards
+
+**Question.** If the mineral recipe were known, what assay would it produce?
+
+Imagine 60 g quartz, 25 g anatase and 15 g rutile in a 100 g mixture. Anatase and rutile are **polymorphs**: distinct crystal structures with the same ideal formula, TiO2. In this deliberately simple oxide basis, quartz contributes only SiO2 and both titanium phases contribute only TiO2.
+
+Before writing $a=Cm$, give each symbol a job. Start with a 100 g toy sample. Its assay reports
+60 g SiO2 and 40 g TiO2, so the **assay vector** is a column of the measured oxide fractions:
+
+$$
+a=
+\begin{bmatrix}
+a_{\mathrm{SiO2}}\\
+a_{\mathrm{TiO2}}
+\end{bmatrix}
+=
+\begin{bmatrix}
+0.60\\
+0.40
+\end{bmatrix}.
+$$ {#eq-assay-vector}
+
+The unknown we want is the **mineral-fraction vector**. Its entries are the mass fractions of
+quartz, anatase and rutile in the same sample:
+
+$$
+m=
+\begin{bmatrix}
+m_{\mathrm{quartz}}\\
+m_{\mathrm{anatase}}\\
+m_{\mathrm{rutile}}
+\end{bmatrix}.
+$$ {#eq-mineral-vector}
+
+The remaining object, $C$, is the **mineral-to-assay response matrix**. Entry $c_{ij}$ says how
+much of assay component $i$ is contributed by one unit mass of mineral $j$. Rows are assay
+components, columns are minerals. For the idealised chemistry in this example,
+
+$$
+C=
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 1
+\end{bmatrix}.
+$$ {#eq-response-matrix}
+
+Read the first column as “one unit of quartz contributes one unit of SiO2 and no TiO2”. Read the
+second and third columns as “one unit of anatase or rutile contributes TiO2 only”. Mineral
+chemistry supplies these columns; it is not estimated from this toy assay.
+
+For any assay component $i$, the forward calculation is a weighted sum over minerals:
+
+$$
+a_i=\sum_{j=1}^{p}c_{ij}m_j.
+$$ {#eq-component-sum}
+
+Here $p$ is the number of minerals in the declared list. Each term $c_{ij}m_j$ is one mineral's
+contribution to one assay component.
+
+Writing every component sum at once gives the compact matrix form used by Whiten (2008):
+
+$$
+a=Cm.
+$$ {#eq-forward}
+
+The dimensions make the multiplication checkable. Here $C$ is $2\times3$, $m$ is $3\times1$,
+and the result $a$ is $2\times1$. In words: multiply each mineral column by its fraction, then
+add the columns. If the recipe is 60% quartz, 25% anatase and 15% rutile, the calculation is
+
+$$
+\begin{bmatrix}
+\mathrm{SiO2}\\
+\mathrm{TiO2}
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 1
+\end{bmatrix}
+\begin{bmatrix}
+0.60\\
+0.25\\
+0.15
+\end{bmatrix}
+=
+\begin{bmatrix}
+0.60\\
+0.40
+\end{bmatrix}.
+$$ {#eq-toy-forward-multiplication}
+
+This is the easy direction: mineral recipe to assay. The inverse problem starts with the final
+column, $a$, and asks which non-negative, closed mineral vectors $m$ could have produced it. There
+is no general operation called “divide by $C$”. Whether a reverse calculation is unique depends on
+the columns of $C$ and on the constraints we are willing to state.
+
+All displayed cells below are one visible, top-to-bottom program. Inputs are embedded; later cells use only objects defined in earlier visible cells. Random work uses named local generators with declared seeds. Calculations use fractions and displays use wt%.
+
+```{python}
+#| label: toy-forward
+#| code-fold: show
+import numpy as np
+from scipy.optimize import nnls, minimize, linprog
+from pandas import DataFrame, concat
+from plotnine import (
+    ggplot, aes, geom_line, geom_col, geom_point, geom_density, geom_vline,
+    geom_segment, geom_text, facet_wrap, labs, theme_minimal, theme,
+    element_text, element_blank, scale_color_manual, scale_fill_manual,
+    scale_linetype_manual, scale_x_continuous, coord_cartesian, position_dodge
+)
+from IPython.display import display
+
+rtol, atol = 1e-9, 1e-10
+C = np.array([[1., 0., 0.], [0., 1., 1.]])
+names = ("Quartz", "Anatase", "Rutile")
+oxides = ("SiO2", "TiO2")
+m_star = np.array([.60, .25, .15])
+a = C @ m_star
+
+assert C.shape == (2, 3) and m_star.shape == (3,) and a.shape == (2,)
+assert np.isfinite(C).all() and np.isfinite(m_star).all() and np.isfinite(a).all()
+np.testing.assert_allclose(m_star.sum(), 1., rtol=rtol, atol=atol)
+np.testing.assert_allclose(a, [.60, .40], rtol=rtol, atol=atol)
+display(DataFrame(C, index=oxides, columns=names))
+display(DataFrame({"Quantity": [*names, *oxides],
+                   "Synthetic wt%": 100 * np.r_[m_star, a]}))
+```
+
+The forward answer is 60 wt% SiO2 and 40 wt% TiO2. This is bookkeeping, not inference.
+
+::: {.callout-note collapse="true"}
+## From formulae to real response columns
+
+For ideal formula chemistry, an elemental mass response is
+
+$$
+C^{\mathrm{elem}}_{ij}=\frac{n_{ij}M_i}{\sum_k n_{kj}M_k},\qquad
+a^{\mathrm{oxide}}=a^{\mathrm{element}}\frac{M_{\mathrm{oxide}}}{\nu M_{\mathrm{element}}}.
+$$
+
+Here \(n_{ij}\) is the count of element \(i\) in mineral \(j\), \(M\) is molar mass and \(\nu\) is the relevant element count in the oxide. If FeO is converted to Fe2O3-equivalent, the multiplier \(159.69/143.69\) changes the reporting basis; it does not infer oxidation state. Measured grain chemistry can replace ideal formulae. Missing water, CO2, unassayed elements and solid solution mean real columns need not sum to one.
+:::
+
+**What this means.** A declared recipe and response matrix determine a forward assay. **What it does not mean.** Reversing the calculation will necessarily recover the recipe.
+
+## From an assay back to minerals
+
+The inverse problem starts with the assay vector $a$ and asks for the mineral-fraction vector $m$.
+The matrix relation has not changed:
+
+$$
+a=Cm.
+$$
+
+What changes is which quantity is known. In the forward calculation, we knew $m$ and multiplied.
+In inversion, we know $a$ and need to solve for $m$.
+
+### The special case: an ordinary inverse
+
+An ordinary matrix inverse exists only when $C$ is square and full rank. In plain terms, there must
+be the same number of independent assay components as unknown minerals, and no mineral column can
+be reproduced by a combination of the others. If those conditions hold, multiply both sides on the
+left by $C^{-1}$:
+
+$$
+C^{-1}a=C^{-1}Cm=Im=m.
+$$
+
+So the ordinary inverse formula is
+
+$$
+m=C^{-1}a.
+$$ {#eq-ordinary-inverse}
+
+The order matters. It is not $a=Cb^{-1}$: $b$ is not part of the notation here, and a matrix
+inverse acts on the left of the assay vector. Some papers instead write the same relationship as
+$b=Ax$, with $b$ for assays, $A$ for mineral chemistry and $x$ for mineral fractions. The letters
+change; the calculation does not.
+
+This tidy case is useful for understanding the algebra, but it is uncommon in EMC. Our toy $C$ is
+$2\times3$, so it has two assay rows and three mineral columns. It cannot have an ordinary inverse:
+there is no $C^{-1}$ for a non-square matrix.
+
+### The usual cases
+
+There are three practical possibilities.
+
+1. **More independent assays than minerals.** If $C$ has more rows than columns and full column
+   rank, assay noise can still prevent an exact match. Weighted least squares finds the mineral
+   vector whose reconstructed assay is closest to the measured assay after accounting for assay
+   uncertainty:
+
+   $$
+   \widehat m=
+   \left(C^\mathsf{T}\Sigma_a^{-1}C\right)^{-1}
+   C^\mathsf{T}\Sigma_a^{-1}a.
+   $$ {#eq-weighted-least-squares-inverse}
+
+   Here $\Sigma_a$ describes assay uncertainty. The formula is a least-squares estimate, not an
+   ordinary inverse, and it can still return negative mineral fractions.
+
+2. **Fewer independent assays than minerals, or duplicate mineral signatures.** This is our toy
+   case. There can be many exact solutions, because a change along a null direction leaves $Cm$
+   unchanged. The Moore-Penrose pseudoinverse gives one conventional answer,
+
+   $$
+   m^+=C^+a,
+   $$ {#eq-pseudoinverse-solution}
+
+   usually the solution with the smallest Euclidean length. It is useful for exposing the geometry,
+   but it is not evidence that this particular mineral split occurred.
+
+3. **Physical constraints or additional measurements are available.** We can state the inverse as
+   an optimisation problem instead:
+
+   $$
+   \begin{aligned}
+   \underset{m}{\operatorname{minimise}}\quad &
+   \left\|\Sigma_a^{-1/2}(Cm-a)\right\|_2^2\\
+   \text{subject to}\quad &m_j\geq0\quad\text{for every mineral }j,\\
+   &\mathbf{1}^\mathsf{T}m=1.
+   \end{aligned}
+   $$ {#eq-constrained-inverse}
+
+   The objective says “match the assay within its uncertainty”; non-negativity prevents negative
+   mineral mass; closure makes the mineral fractions sum to one. Extra measurements can add more
+   rows to the problem. For example, a phase-sensitive observation or a QXRD result adds a
+   constraint only if it changes across the mineral alternatives we want to separate.
+
+Berry, Hunt and McKnight (2011) make the same practical point in a bulk-mineralogy workflow. They
+use linear programming when sparse QXRD helps set a calculation standard, and error-weighted
+least squares when chemical and QXRD information are both available. Neither method makes an
+ambiguous chemical signature unique by itself. It states which measurements, weights and
+constraints are being used to choose among compatible mineral vectors.
+
+## Why the assay has several answers
+
+**Question.** Can the 60/40 assay distinguish anatase from rutile?
+
+Every mixture
+
+$$
+m(t)=(0.60,t,0.40-t)^T,\qquad 0\leq t\leq0.40
+$$
+
+has the same assay. **Closure** says fractions sum to one; **non-negativity** excludes negative mass. The matrix has rank two for three fractions. Its null direction \(v=(0,1,-1)^T\) changes the polymorph split while \(Cv=0\). SVD and the pseudoinverse expose this geometry (Whiten, 2008; NumPy Developers, n.d.).
+
+```{python}
+#| label: toy-inverse
+#| code-fold: show
+#| fig-cap: "Which synthetic recipes share one assay? Quartz remains 60 wt% while anatase rises and rutile falls; every point reconstructs 60 wt% SiO2 and 40 wt% TiO2."
+#| fig-alt: "Line chart with quartz fixed at 60 weight percent, anatase rising from zero to 40, and rutile falling from 40 to zero; colour and line type both identify minerals."
+singular = np.linalg.svd(C, compute_uv=False)
+cutoff = max(atol, rtol * singular.max())
+rank = int(np.sum(singular > cutoff))
+m0 = np.linalg.pinv(C, rcond=rtol) @ a
+v = np.array([0., 1., -1.])
+t = np.linspace(0., .4, 201)
+mixtures = np.column_stack((np.full_like(t, .6), t, .4 - t))
+
+assert rank == 2 and C.shape[1] - rank == 1
+np.testing.assert_allclose(singular, [np.sqrt(2), 1.], rtol=rtol, atol=atol)
+np.testing.assert_allclose(C @ v, 0., rtol=rtol, atol=atol)
+np.testing.assert_allclose(m0, [.6, .2, .2], rtol=rtol, atol=atol)
+np.testing.assert_allclose(mixtures @ C.T, np.tile(a, (len(t), 1)),
+                           rtol=rtol, atol=atol)
+np.testing.assert_allclose(mixtures.sum(axis=1), 1., rtol=rtol, atol=atol)
+
+segment_data = DataFrame({
+    "Anatase allocation": np.repeat(100 * t, 3),
+    "Mineral wt%": (100 * mixtures).ravel(),
+    "Mineral": np.tile(names, len(t)),
+})
+segment_plot = (
+    ggplot(segment_data, aes("Anatase allocation", "Mineral wt%",
+                             color="Mineral", linetype="Mineral"))
+    + geom_line(size=1.1)
+    + scale_color_manual(values={"Quartz": "#333333", "Anatase": "#0072B2",
+                                 "Rutile": "#D55E00"})
+    + scale_linetype_manual(values={"Quartz": "solid", "Anatase": "dashed",
+                                    "Rutile": "dashdot"})
+    + labs(x="Anatase allocation, 100t (wt%)", y="Mineral abundance (wt%)")
+    + theme_minimal()
+    + theme(figure_size=(7, 4.2), legend_position="bottom",
+            text=element_text(size=11))
+)
+display(segment_plot)
+print(f"Singular values={singular}; cutoff={cutoff:.3g}; rank={rank}; nullity=1")
+```
+
+**What this means.** The assay identifies quartz and total titanium phase. **What it does not mean.** More precision in the same bulk channels can identify the polymorph split. Exact duplicate columns lose a distinction completely; near-collinear columns instead make it unstable.
+
+## Deterministic methods choose different representatives
+
+**Question.** What do common constrained methods return on the same assay?
+
+Weighted least squares minimises
+
+$$
+Q(m)=\tfrac12\lVert W(Cm-a)\rVert_2^2,
+$$
+
+with \(W=I\) here. NNLS adds \(m\geq0\); equality-constrained fitting also adds \(\mathbf1^Tm=1\). LP reports feasible extrema rather than a preferred point (SciPy Community, n.d.b, n.d.c, n.d.d).
+
+```{python}
+#| label: toy-method-comparison
+#| code-fold: show
+#| fig-cap: "Do deterministic conventions agree? Five exact synthetic solutions reconstruct the assay, yet their anatase/rutile allocations differ; residual norms are multiplied by one quadrillion only to make floating-point differences visible."
+#| fig-alt: "Faceted grouped bars compare quartz, anatase and rutile proportions for pseudoinverse, NNLS, closure fit and two LP endpoints, with a separate residual-norm panel."
+m_nnls, _ = nnls(C, a)
+fit = minimize(
+    lambda m: .5 * np.sum((C @ m - a) ** 2), np.full(3, 1 / 3),
+    jac=lambda m: C.T @ (C @ m - a), method="SLSQP",
+    bounds=[(0, None)] * 3,
+    constraints={"type": "eq", "fun": lambda m: m.sum() - 1,
+                 "jac": lambda m: np.ones(3)},
+    options={"ftol": 1e-12, "maxiter": 1000},
+)
+assert fit.success, fit.message
+
+A_eq, b_eq = np.vstack((C, np.ones(3))), np.r_[a, 1.]
+lp_solutions, lp_bounds = [], []
+for j in range(3):
+    bounds_j = []
+    for sign in (1., -1.):
+        result = linprog(sign * np.eye(3)[j], A_eq=A_eq, b_eq=b_eq,
+                         bounds=(0, None), method="highs")
+        assert result.success, result.message
+        bounds_j.append(result.x[j])
+        if j in (1, 2) and sign == -1.:
+            lp_solutions.append(result.x)
+    lp_bounds.append(bounds_j)
+
+solutions = {
+    "Pseudoinverse": m0,
+    "NNLS": m_nnls,
+    "Closure": fit.x,
+    "LP A endpoint": lp_solutions[0],
+    "LP R endpoint": lp_solutions[1],
+}
+for solution in solutions.values():
+    assert np.isfinite(solution).all() and solution.min() >= -atol
+    np.testing.assert_allclose(solution.sum(), 1., rtol=rtol, atol=atol)
+    np.testing.assert_allclose(C @ solution, a, rtol=rtol, atol=atol)
+np.testing.assert_allclose(np.array(lp_bounds), [[.6, .6], [0, .4], [0, .4]],
+                           rtol=rtol, atol=atol)
+
+composition_rows, residual_rows = [], []
+for method, solution in solutions.items():
+    for mineral, value in zip(names, solution):
+        composition_rows.append({"Panel": "Returned composition", "Method": method,
+                                 "Quantity": mineral, "Value": 100 * value})
+    residual_rows.append({"Panel": "Assay residual norm × 1e15", "Method": method,
+                          "Quantity": "Residual × 1e15",
+                          "Value": 1e15 * np.linalg.norm(C @ solution - a)})
+method_data = DataFrame(composition_rows + residual_rows)
+method_plot = (
+    ggplot(method_data, aes("Quantity", "Value", fill="Method"))
+    + geom_col(position=position_dodge(width=.82), width=.76)
+    + facet_wrap("~ Panel", scales="free", ncol=1)
+    + scale_fill_manual(values={"Pseudoinverse": "#0072B2", "NNLS": "#009E73",
+                                "Closure": "#D55E00", "LP A endpoint": "#CC79A7",
+                                "LP R endpoint": "#E69F00"})
+    + labs(x=None, y="wt% (composition) or residual norm × 1e15")
+    + theme_minimal()
+    + theme(figure_size=(7, 6.2), legend_position="bottom",
+            legend_box="vertical", text=element_text(size=9))
+)
+display(method_plot)
+display(DataFrame({"Mineral": names,
+                   "LP minimum wt%": 100 * np.array(lp_bounds)[:, 0],
+                   "LP maximum wt%": 100 * np.array(lp_bounds)[:, 1]}))
+```
+
+LP's 0–40 wt% phase ranges are feasibility intervals, not probabilities, credible intervals or repeated-sample coverage. Noisy assays can make the exact feasible set empty; widening a numerical tolerance is not a measurement-error model.
+
+**What this means.** Constraints prevent some physically impossible answers and LP displays what remains possible. **What it does not mean.** A solver-selected exact fit is newly measured truth.
+
+## Allocation order is a visible convention
+
+**Question.** How can a staged recipe change the story?
+
+At each synthetic stage below, one analyte is allocated to a compatible phase. The two declared recipes reverse the analyte order and use opposite titanium tie-breaks:
+
+$$
+\text{allocated amount}=\frac{\text{remaining analyte}}{\text{phase response}}.
+$$
+
+```{python}
+#| label: toy-allocation-order
+#| code-fold: show
+#| fig-cap: "When does each synthetic phase receive mass? The Si-first/anatase-first recipe and Ti-first/rutile-first recipe both end at an exact assay fit, but the intermediate path and final polymorph differ."
+#| fig-alt: "Two faceted staged bar charts: one allocates quartz then anatase, the other rutile then quartz; both finish at 100 weight percent total."
+recipes = {
+    "Si first; anatase tie-break": ((0, 0), (1, 1)),
+    "Ti first; rutile tie-break": ((1, 2), (0, 0)),
+}
+allocation_rows, allocation_final = [], {}
+for recipe, stages in recipes.items():
+    allocated = np.zeros(3)
+    residual = a.copy()
+    for stage_no, (analyte, mineral) in enumerate(stages, start=1):
+        amount = residual[analyte] / C[analyte, mineral]
+        allocated[mineral] += amount
+        residual -= C[:, mineral] * amount
+        for mineral_name, value in zip(names, allocated):
+            allocation_rows.append({"Recipe": recipe, "Stage": f"Stage {stage_no}",
+                                    "Mineral": mineral_name, "Mineral wt%": 100 * value})
+    allocation_final[recipe] = allocated.copy()
+    assert allocated.min() >= -atol
+    np.testing.assert_allclose(allocated.sum(), 1., rtol=rtol, atol=atol)
+    np.testing.assert_allclose(C @ allocated, a, rtol=rtol, atol=atol)
+
+allocation_data = DataFrame(allocation_rows)
+allocation_plot = (
+    ggplot(allocation_data, aes("Stage", "Mineral wt%", fill="Mineral"))
+    + geom_col()
+    + facet_wrap("~ Recipe", ncol=1)
+    + scale_fill_manual(values={"Quartz": "#333333", "Anatase": "#0072B2",
+                                "Rutile": "#D55E00"})
+    + labs(x=None, y="Allocated mineral (wt%)")
+    + theme_minimal()
+    + theme(figure_size=(7, 5.8), legend_position="bottom",
+            text=element_text(size=10))
+)
+display(allocation_plot)
+```
+
+**What this means.** A staged recipe can encode auditable geological conventions. **What it does not mean.** Changing order resolves the chemistry's missing polymorph information.
+
+## Genetic search: seeds are not phase discovery
+
+**Question.** Does a flexible search find the real mineral list?
+
+This teaching genetic search normalises non-negative chromosomes to the simplex, ranks them by
+
+$$
+\text{fitness}(m)=-\lVert C_{\mathcal J}m-a\rVert_2^2,
+$$
+
+and uses 80 candidates, 160 generations, 20 elites, convex crossover and Gaussian mutation. It is deliberately small. The scientific model is the candidate set \(\mathcal J\). We compare exactly four lists:
+
+1. **quartz + anatase**: identified exact fit;
+2. **quartz + rutile**: identified exact fit;
+3. **quartz + anatase + rutile**: exact but structurally ambiguous;
+4. **anatase + rutile (quartz omitted)**: deliberately misspecified.
+
+```{python}
+#| label: toy-genetic-search
+#| code-fold: show
+candidate_lists = {
+    "quartz + anatase": (0, 1),
+    "quartz + rutile": (0, 2),
+    "quartz + anatase + rutile": (0, 1, 2),
+    "anatase + rutile (quartz omitted)": (1, 2),
+}
+seeds = (7, 19, 43, 101)
+
+def toy_genetic_search(indices, seed):
+    rng_ga = np.random.default_rng(seed)
+    response = C[:, indices]
+    population = rng_ga.dirichlet(np.ones(len(indices)), size=80)
+    for generation in range(160):
+        errors = np.linalg.norm(population @ response.T - a, axis=1)
+        elite = population[np.argsort(errors)[:20]]
+        parents = rng_ga.integers(0, len(elite), size=(60, 2))
+        blend = rng_ga.uniform(size=(60, 1))
+        children = blend * elite[parents[:, 0]] + (1 - blend) * elite[parents[:, 1]]
+        mutation_sd = .05 * (1 - generation / 160) + .001
+        children = np.maximum(children + rng_ga.normal(0, mutation_sd, children.shape),
+                              1e-12)
+        children /= children.sum(axis=1, keepdims=True)
+        population = np.vstack((elite, children))
+    errors = np.linalg.norm(population @ response.T - a, axis=1)
+    best = population[np.argmin(errors)]
+    full = np.zeros(3)
+    full[list(indices)] = best
+    return full, float(errors.min())
+
+ga_rows = []
+for candidate_list, indices in candidate_lists.items():
+    for seed in seeds:
+        solution, residual = toy_genetic_search(indices, seed)
+        rerun_solution, rerun_residual = toy_genetic_search(indices, seed)
+        np.testing.assert_allclose(solution, rerun_solution, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(residual, rerun_residual, rtol=rtol, atol=atol)
+        assert np.isfinite(solution).all() and np.isfinite(residual)
+        assert solution.min() >= -atol
+        np.testing.assert_allclose(solution.sum(), 1., rtol=rtol, atol=atol)
+        for mineral, fraction in zip(names, solution):
+            ga_rows.append({"candidate_list": candidate_list, "seed": seed,
+                            "mineral": mineral, "fraction": fraction,
+                            "residual": residual, "fitness": -(residual ** 2),
+                            "misspecified": "omitted" in candidate_list})
+
+ga_data = DataFrame(ga_rows)
+summary = ga_data.drop_duplicates(["candidate_list", "seed"])
+assert summary.loc[summary.candidate_list.isin(
+    ["quartz + anatase", "quartz + rutile"]), "residual"].max() < 2e-3
+three = ga_data[ga_data.candidate_list == "quartz + anatase + rutile"]
+ti_totals = three[three.mineral != "Quartz"].groupby("seed")["fraction"].sum()
+np.testing.assert_allclose(ti_totals, .4, rtol=0, atol=2e-3)
+assert three[three.mineral == "Anatase"].groupby("seed")["fraction"].first().std() > .01
+assert summary.loc[summary.misspecified, "residual"].min() > .8
+```
+
+```{python}
+#| label: toy-genetic-solutions
+#| code-fold: show
+#| fig-cap: "What changes across genetic-search seeds and candidate lists? Identified two-phase lists are stable, the three-phase list preserves about 40 wt% total titanium phase while its split varies, and the no-quartz list cannot represent the true recipe."
+#| fig-alt: "Four faceted line-and-point panels show mineral proportions for seeds 7, 19, 43 and 101; the two exact two-phase lists are stable, the three-phase polymorph split varies, and the omitted-quartz model contains only titanium phases."
+ga_data["Mineral wt%"] = 100 * ga_data["fraction"]
+ga_plot = (
+    ggplot(ga_data, aes("seed", "Mineral wt%", color="mineral",
+                        linetype="mineral", group="mineral"))
+    + geom_line(size=.8) + geom_point(size=2)
+    + facet_wrap("~ candidate_list", ncol=2)
+    + scale_color_manual(values={"Quartz": "#333333", "Anatase": "#0072B2",
+                                 "Rutile": "#D55E00"})
+    + scale_linetype_manual(values={"Quartz": "solid", "Anatase": "dashed",
+                                    "Rutile": "dashdot"})
+    + labs(x="Fixed search seed", y="Returned mineral (wt%)",
+           color="Mineral", linetype="Mineral")
+    + theme_minimal()
+    + theme(figure_size=(8, 6.2), legend_position="bottom",
+            text=element_text(size=9), strip_text=element_text(size=8))
+)
+display(ga_plot)
+```
+
+```{python}
+#| label: toy-genetic-fitness
+#| code-fold: show
+#| fig-cap: "Can each candidate list reconstruct the synthetic assay? Exact lists reach negligible residuals; omitting quartz leaves a material residual near 0.85 on the fraction scale."
+#| fig-alt: "Point chart of residual norm by seed and candidate list; three lists lie near zero while the quartz-omitted list lies near 0.85."
+fitness_data = summary.copy()
+fitness_plot = (
+    ggplot(fitness_data, aes("seed", "residual", color="candidate_list",
+                             linetype="candidate_list", group="candidate_list"))
+    + geom_line(size=.8) + geom_point(size=2.2)
+    + facet_wrap("~ candidate_list", ncol=2)
+    + scale_color_manual(values={
+        "quartz + anatase": "#0072B2", "quartz + rutile": "#D55E00",
+        "quartz + anatase + rutile": "#009E73",
+        "anatase + rutile (quartz omitted)": "#CC79A7"})
+    + scale_linetype_manual(values={
+        "quartz + anatase": "solid", "quartz + rutile": "dashed",
+        "quartz + anatase + rutile": "dashdot",
+        "anatase + rutile (quartz omitted)": "dotted"})
+    + labs(x="Fixed search seed", y="Assay residual norm (fraction scale)")
+    + theme_minimal()
+    + theme(figure_size=(7.4, 5.6), legend_position="none",
+            text=element_text(size=9), strip_text=element_text(size=8))
+)
+display(fitness_plot)
+```
+
+Repeated seeds expose **numerical search variability**. Changing the candidate list changes the **scientific model**. The three-phase ridge is structural ambiguity; the no-quartz residual is misspecification. A genetic algorithm cannot discover the real phase list unless phase inclusion is encoded and selected with justified penalties.
+
+**What this means.** Search can navigate a chosen objective. **What it does not mean.** Seed spread is posterior uncertainty, or a good residual proves the declared phases are real.
+
+## Labels can calibrate a choice
+
+**Question.** What changes when paired modal labels are available?
+
+Suppose held-back synthetic calibration labels give weights 0.70 and 0.30 to the two LP endpoints. Their convex average is
+
+$$
+m_{\mathrm{avg}}=0.70(0.60,0.40,0)+0.30(0.60,0,0.40)
+=(0.60,0.28,0.12).
+$$
+
+```{python}
+#| label: toy-calibrated-averaging
+#| code-fold: show
+#| fig-cap: "Where does a label-calibrated answer come from? The upper panel shows two synthetic exact candidates and their 70/30 weighted result; the lower panel separates label supervision from the mass-balance reconstruction check in a learned route."
+#| fig-alt: "Two-panel graphic: mineral bars compare candidate A, candidate B and a weighted result; a node-and-line schematic shows modal labels supervising a network while assay and predicted modes connect through a chemistry reconstruction check."
+weights = np.array([.70, .30])
+candidates = np.vstack((np.array([.6, .4, 0.]), np.array([.6, 0., .4])))
+weighted = weights @ candidates
+np.testing.assert_allclose(weights.sum(), 1., rtol=rtol, atol=atol)
+np.testing.assert_allclose(weighted, [.6, .28, .12], rtol=rtol, atol=atol)
+np.testing.assert_allclose(weighted.sum(), 1., rtol=rtol, atol=atol)
+np.testing.assert_allclose(C @ weighted, a, rtol=rtol, atol=atol)
+
+bar_rows = []
+for block, (label, values) in enumerate(zip(
+        ("Candidate A", "Candidate B", "Weighted result"),
+        (candidates[0], candidates[1], weighted))):
+    for j, (mineral, value) in enumerate(zip(names, values)):
+        bar_rows.append({"Panel": "Label-calibrated averaging", "x": 1 + 4 * block + j,
+                         "y": value, "Mineral": mineral})
+bar_data = DataFrame(bar_rows)
+bar_labels = DataFrame({
+    "Panel": "Label-calibrated averaging", "x": [2, 6, 10], "y": [.92] * 3,
+    "label": ["Candidate A", "Candidate B", "70/30 result"]})
+nodes = DataFrame({
+    "Panel": "Learned route: two information sources", "x": [1, 3, 5, 7, 3],
+    "y": [.35, .35, .35, .35, .75],
+    "label": ["Assay", "Network", "Predicted\nmodes", "Reconstructed\nassay",
+              "Modal\nlabels"]})
+edges = DataFrame({
+    "Panel": "Learned route: two information sources",
+    "x": [1.25, 3.25, 5.25, 3.0], "xend": [2.75, 4.75, 6.75, 3.0],
+    "y": [.35, .35, .35, .67], "yend": [.35, .35, .35, .43]})
+
+information_plot = (
+    ggplot()
+    + geom_col(bar_data, aes("x", "y", fill="Mineral"), width=.8)
+    + geom_text(bar_labels, aes("x", "y", label="label"), size=8)
+    + geom_segment(edges, aes(x="x", y="y", xend="xend", yend="yend"),
+                   size=.8, color="#555555")
+    + geom_point(nodes, aes("x", "y"), size=8, color="#E69F00")
+    + geom_text(nodes, aes("x", "y", label="label"), size=7)
+    + facet_wrap("~ Panel", ncol=1)
+    + scale_fill_manual(values={"Quartz": "#333333", "Anatase": "#0072B2",
+                                "Rutile": "#D55E00"})
+    + scale_x_continuous(breaks=[])
+    + coord_cartesian(ylim=(0, 1))
+    + labs(x=None, y="Fraction / information route")
+    + theme_minimal()
+    + theme(figure_size=(7.5, 6.4), legend_position="bottom",
+            text=element_text(size=9), panel_grid=element_blank(),
+            axis_title_x=element_blank())
+)
+display(information_plot)
+```
+
+In a neural route, paired modal labels supervise the assay-to-mode mapping; a mass-balance decoder or penalty checks predicted chemistry against the chosen response matrix. Labels are new evidence of a different kind. The reconstruction penalty is not a second modal label. No large model is trained here, and this toy graphic is only an illustration.
+
+**What this means.** Labels can teach how to choose among chemistry-compatible candidates. **What it does not mean.** Averaging adds chemical information or identifies the null direction from the assay alone.
+
+## Bayesian inference, one definition at a time
+
+Bayesian language can make a simple idea sound harder than it is, so let us keep each piece tied to
+the mixture. In this toy example, the only unknown is the anatase fraction $t$; quartz is fixed at
+60 wt% and rutile is whatever remains of the 40 wt% titanium phase.
+
+- A **prior** says which values of $t$ were plausible before this sample's observations.
+- A **forward prediction** turns a proposed $t$ into predicted measurements.
+- A **likelihood** asks how compatible those predictions are with the measurements.
+- A **posterior** combines the prior and likelihood, then rescales the result so it is a probability distribution.
+- A **posterior draw** is one self-consistent sampled state from that distribution.
+- A **credible interval** is conditional: it contains a stated posterior probability only if the model, prior and data assumptions are reasonable.
+- A **posterior predictive distribution** asks what a new measurement would look like if the fitted model were used to generate it.
+
+For the toy problem, Bayes' rule is simply
+
+$$
+p(t\mid a,y)
+= \frac{p(a,y\mid t)\,p(t)}
+       {\displaystyle\int_0^{0.40}p(a,y\mid u)\,p(u)\,du},
+\qquad 0\leq t\leq0.40.
+$$ {#eq-toy-bayes}
+
+The top line says, “start with a plausible split, then favour the values that predict what we
+observed.” The bottom line is just the normalising constant: it makes the posterior add up to one.
+Here $a$ is the bulk assay and $y$ is an additional, invented phase-sensitive measurement. The
+point is to keep those two sources of information separate.
+
+The forward and observation models are
+
+$$
+m(t)=(0.60,t,0.40-t)^\mathsf{T},\qquad
+a\mid t\sim N\!\left(Cm(t),\Sigma_a\right),\qquad
+y\mid t\sim N\!\left(t,\sigma_y^2\right).
+$$ {#eq-toy-observation-model}
+
+The assay can constrain anything that changes $Cm(t)$. The phase-sensitive observation can
+constrain $t$ directly. If neither changes along a possible mineral split, neither can resolve it.
+
+### Dirichlet priors describe closed compositions
+
+**Question.** What do a prior centre and concentration do?
+
+For $m\sim\operatorname{Dirichlet}(\alpha)$, write $\alpha=\kappa\mu$, where the centre $\mu$ is a
+composition that sums to one and the concentration is $\kappa=\sum_j\alpha_j$. Then
+$E[m]=\mu$. In plain terms, $\mu$ says where the prior is centred and $\kappa$ says how tightly it
+is held there. Closure means the fractions compete: if
+one rises, at least one other must fall.
+
+```{python}
+#| label: toy-dirichlet-prior
+#| code-fold: show
+#| fig-cap: "How do Dirichlet centre and concentration alter prior compositions? Synthetic prior marginals move with the centre and tighten as concentration rises; all draws close to one."
+#| fig-alt: "Faceted density plots for quartz, anatase and rutile under three prior scenarios; two share a centre but differ in spread, while the third favours anatase over rutile."
+prior_specs = {
+    "centre 60/20/20; k=10": np.array([6., 2., 2.]),
+    "centre 60/20/20; k=40": np.array([24., 8., 8.]),
+    "centre 60/30/10; k=10": np.array([6., 3., 1.]),
+}
+rng_prior = np.random.default_rng(20260907)
+prior_rows, prior_draw_blocks = [], {}
+for scenario, alpha in prior_specs.items():
+    draws = rng_prior.dirichlet(alpha, size=3000)
+    prior_draw_blocks[scenario] = draws
+    np.testing.assert_allclose(draws.sum(axis=1), 1., rtol=rtol, atol=atol)
+    for j, mineral in enumerate(names):
+        prior_rows.extend({"Scenario": scenario, "Mineral": mineral,
+                           "Mineral wt%": 100 * value} for value in draws[:, j])
+prior_draws = DataFrame(prior_rows)
+
+same_centre_low = prior_draw_blocks["centre 60/20/20; k=10"]
+covariance = np.cov(same_centre_low, rowvar=False)
+assert covariance[np.triu_indices(3, 1)].max() < 0
+prior_plot = (
+    ggplot(prior_draws, aes("Mineral wt%", color="Scenario", linetype="Scenario"))
+    + geom_density(size=.9)
+    + facet_wrap("~ Mineral", ncol=1, scales="free_y")
+    + scale_color_manual(values=dict(zip(prior_specs,
+        ["#0072B2", "#D55E00", "#009E73"])))
+    + scale_linetype_manual(values=dict(zip(prior_specs,
+        ["solid", "dashed", "dashdot"])))
+    + labs(x="Prior mineral abundance (wt%)", y="Prior density")
+    + theme_minimal()
+    + theme(figure_size=(7.2, 7.2), legend_position="bottom",
+            legend_box="vertical", text=element_text(size=9))
+)
+display(prior_plot)
+display(DataFrame(covariance, index=names, columns=names))
+```
+
+These are prior-only synthetic draws, not assay evidence. Parameters below one favour simplex
+boundaries but do not create an exact-zero point mass; zero Dirichlet parameters are invalid
+(SciPy Community, n.d.a). For the one-dimensional grid below, the same Dirichlet density is
+evaluated only along the feasible line $m(t)$; equal grid spacing makes the normalised values a
+discrete approximation to $p(t)$.
+
+### The assay likelihood stays flat along the null direction
+
+In this example, every $m(t)$ gives the same $Cm(t)$. So the assay likelihood is flat across
+the entire feasible split:
+
+$$
+p(a\mid t)\ \text{is constant for}\ 0\leq t\leq0.40.
+$$ {#eq-flat-assay-likelihood}
+
+The assay-only posterior therefore equals the prior along this ridge. That is not a failure of
+Bayesian inference; it is an honest statement that the assay learned nothing about the anatase--
+rutile split.
+
+**Question.** What happens if we add genuinely phase-sensitive information?
+
+For teaching only, invent an observation $y=0.28$ with known scale $\sigma_y=0.04$, where
+$y\mid t\sim N(t,\sigma_y^2)$. Treat it as a generic phase-sensitive instrument response on the
+same fraction scale. It is an invented measurement, not bulk chemistry.
+
+```{python}
+#| label: toy-grid-posterior
+#| code-fold: show
+#| fig-cap: "What updates the synthetic polymorph split? The assay-only likelihood is flat, so the assay-only posterior equals the prior; the invented phase-sensitive observation shifts and tightens the normalised grid posterior."
+#| fig-alt: "Two faceted line charts: prior and posterior densities over anatase fraction, plus a flat assay likelihood and peaked invented phase-sensitive likelihood; colour and line type distinguish curves."
+t_grid = np.linspace(.0002, .3998, 2000)
+grid_m = np.column_stack((np.full_like(t_grid, .6), t_grid, .4 - t_grid))
+alpha_grid = np.array([6., 2., 2.])
+y_observed, sigma_y = .28, .04
+
+assay_prediction = grid_m @ C.T
+np.testing.assert_allclose(assay_prediction, np.tile(a, (len(t_grid), 1)),
+                           rtol=rtol, atol=atol)
+assay_relative = np.ones_like(t_grid)
+log_prior = np.log(grid_m) @ (alpha_grid - 1.)
+prior_raw = np.exp(log_prior - log_prior.max())
+prior_mass = prior_raw / prior_raw.sum()
+assay_only_raw = prior_mass * assay_relative
+assay_only_normaliser = assay_only_raw.sum()
+assay_only_posterior = assay_only_raw / assay_only_normaliser
+np.testing.assert_allclose(assay_only_normaliser, 1., rtol=rtol, atol=atol)
+np.testing.assert_allclose(assay_only_posterior, prior_mass, rtol=rtol, atol=atol)
+log_phase_likelihood = -.5 * ((y_observed - t_grid) / sigma_y) ** 2
+phase_relative = np.exp(log_phase_likelihood - log_phase_likelihood.max())
+posterior_raw = prior_mass * phase_relative
+normaliser = posterior_raw.sum()
+posterior_mass = posterior_raw / normaliser
+
+assert np.isfinite(normaliser) and normaliser > 0
+assert np.isfinite(posterior_mass).all() and (posterior_mass >= 0).all()
+np.testing.assert_allclose(posterior_mass.sum(), 1., rtol=rtol, atol=atol)
+assert np.max(np.abs(posterior_mass - assay_only_posterior)) > 1e-3
+spacing = t_grid[1] - t_grid[0]
+prior_density = prior_mass / spacing
+posterior_density = posterior_mass / spacing
+posterior_mean = float(np.sum(t_grid * posterior_mass))
+posterior_map = float(t_grid[np.argmax(posterior_mass)])
+cdf = np.cumsum(posterior_mass)
+ci90 = np.interp([.05, .95], cdf, t_grid)
+assert 0 < ci90[0] < posterior_mean < ci90[1] < .4
+
+coarse_t = np.linspace(.0004, .3996, 1000)
+coarse_m = np.column_stack((np.full_like(coarse_t, .6), coarse_t, .4 - coarse_t))
+coarse_prior = np.exp(np.log(coarse_m) @ (alpha_grid - 1.))
+coarse_like = np.exp(-.5 * ((y_observed - coarse_t) / sigma_y) ** 2)
+coarse_mass = coarse_prior * coarse_like
+coarse_mass /= coarse_mass.sum()
+coarse_mean = float(np.sum(coarse_t * coarse_mass))
+assert abs(posterior_mean - coarse_mean) < 2e-4
+
+posterior_curves = concat([
+    DataFrame({"t": 100 * t_grid, "value": prior_density / 100,
+               "Curve": "Prior density", "Panel": "Probability density"}),
+    DataFrame({"t": 100 * t_grid, "value": posterior_density / 100,
+               "Curve": "Posterior density", "Panel": "Probability density"}),
+    DataFrame({"t": 100 * t_grid, "value": assay_relative,
+               "Curve": "Assay likelihood (relative)", "Panel": "Likelihood shape"}),
+    DataFrame({"t": 100 * t_grid, "value": phase_relative,
+               "Curve": "Invented phase observation (relative)", "Panel": "Likelihood shape"}),
+], ignore_index=True)
+posterior_plot = (
+    ggplot(posterior_curves, aes("t", "value", color="Curve", linetype="Curve"))
+    + geom_line(size=1)
+    + facet_wrap("~ Panel", ncol=1, scales="free_y")
+    + scale_color_manual(values={"Prior density": "#0072B2",
+        "Posterior density": "#D55E00", "Assay likelihood (relative)": "#333333",
+        "Invented phase observation (relative)": "#009E73"})
+    + scale_linetype_manual(values={"Prior density": "solid",
+        "Posterior density": "dashed", "Assay likelihood (relative)": "dotted",
+        "Invented phase observation (relative)": "dashdot"})
+    + labs(x="Anatase fraction, 100t (wt%)",
+           y="Density (per wt%) or relative likelihood")
+    + theme_minimal()
+    + theme(figure_size=(7.2, 6), legend_position="bottom",
+            legend_box="vertical", text=element_text(size=9))
+)
+display(posterior_plot)
+print(f"Posterior mean={100*posterior_mean:.2f} wt%; MAP={100*posterior_map:.2f} wt%; "
+      f"central 90% credible interval=({100*ci90[0]:.2f}, {100*ci90[1]:.2f}) wt%")
+```
+
+The prior and posterior curves integrate to one; the likelihood panel is explicitly relative to its
+own maximum. The central 90% credible interval is a posterior probability statement conditional
+on this invented model. It is neither the LP range nor a guarantee of 90% repeated-sample coverage.
+This Gaussian-likelihood/Dirichlet-prior construction is not conjugate, which is why the example
+uses a numerical grid rather than a closed-form update.
+
+**What this means.** An additional phase-sensitive measurement can update the split because it changes along $t$. **What it does not mean.** Bayesian inference created information absent from the assay.
+
+### A practical Python route: PyMC, NumPyro, Bambi and ArviZ
+
+The grid is useful here because it lets us see the flat assay likelihood. For a model with more
+minerals, samples or uncertain chemistry, use a sampler instead. The tools have different jobs:
+
+- **PyMC** is a good default for writing the custom mineral model in Python.
+- **NumPyro** expresses the same sort of model with JAX and NUTS. It can be a fast option for a
+  larger model, but it does not change the identifiability problem, so benchmark it on the model
+  you actually need.
+- **Bambi** is a formula interface built on PyMC. It is handy when calibrating a phase-sensitive
+  instrument from known modal fractions, but it is not the right abstraction for the custom
+  deterministic mass-balance relationship below.
+- **ArviZ** reads output from both PyMC and NumPyro, then gives the same summaries, trace plots
+  and posterior-predictive checks.
+
+These roles follow the projects' own documentation (Bambi, n.d.; PyMC Developers, n.d.; NumPyro
+Contributors, n.d.; ArviZ Developers, n.d.).
+
+The model below leaves the assay as a deterministic calculation because, in this toy mixture,
+$Cm(t)$ does not vary with $t$. Giving that constant quantity a Gaussian likelihood would make the
+code longer without adding information. The invented phase-sensitive response is the only
+observation that updates the anatase-rutile split.
+
+```{python}
+#| label: toy-pymc-nuts
+#| code-fold: show
+#| eval: false
+import arviz as az
+import pymc as pm
+import pytensor.tensor as pt
+
+with pm.Model(coords={"oxide": oxides, "mineral": names}) as toy_pymc:
+    # The Beta prior is the two-part Dirichlet prior written on the 0 to 0.40 ridge.
+    t_share = pm.Beta("t_share", alpha=2, beta=2)
+    t = pm.Deterministic("anatase_fraction", 0.40 * t_share)
+    m = pm.Deterministic("mineral_fraction", pt.stack([0.60, t, 0.40 - t]),
+                         dims="mineral")
+    pm.Deterministic("assay_mean", pt.dot(C, m), dims="oxide")
+    pm.Normal("phase_response", mu=t, sigma=sigma_y, observed=y_observed)
+
+    idata_pymc = pm.sample(draws=2_000, tune=1_000, chains=4,
+                            target_accept=0.90, random_seed=20260907)
+    pm.sample_posterior_predictive(idata_pymc, var_names=["phase_response"],
+                                   extend_inferencedata=True,
+                                   random_seed=20260908)
+
+display(az.summary(idata_pymc, var_names=["anatase_fraction"], kind="all"))
+az.plot_trace(idata_pymc, var_names=["anatase_fraction"])
+az.plot_ppc(idata_pymc, num_pp_samples=100)
+```
+
+The PyMC cell uses NUTS and returns an ArviZ `InferenceData` object. The three ArviZ calls answer
+three separate questions: what values were estimated; whether the chains mix; and whether the
+invented response looks plausible under the fitted model. Do not treat a good trace or a good
+posterior-predictive plot as proof that the mineral list is complete.
+
+Here is the same toy model in NumPyro. It is deliberately a second implementation, not an extra
+source of evidence. Run either this cell or the PyMC cell for one analysis.
+
+```{python}
+#| label: toy-numpyro-nuts
+#| code-fold: show
+#| eval: false
+from jax import random
+import jax.numpy as jnp
+import numpyro
+import numpyro.distributions as dist
+from numpyro.infer import MCMC, NUTS, Predictive
+
+def toy_numpyro_model(y=y_observed, sigma=sigma_y):
+    t_share = numpyro.sample("t_share", dist.Beta(2, 2))
+    t = numpyro.deterministic("anatase_fraction", 0.40 * t_share)
+    m = numpyro.deterministic("mineral_fraction",
+                              jnp.array([0.60, t, 0.40 - t]))
+    numpyro.deterministic("assay_mean", jnp.asarray(C) @ m)
+    numpyro.sample("phase_response", dist.Normal(t, sigma), obs=y)
+
+mcmc = MCMC(NUTS(toy_numpyro_model), num_warmup=1_000, num_samples=2_000,
+            num_chains=4)
+mcmc.run(random.PRNGKey(20260907))
+posterior_predictive = Predictive(
+    toy_numpyro_model, posterior_samples=mcmc.get_samples()
+)(random.PRNGKey(20260908))
+idata_numpyro = az.from_numpyro(mcmc, posterior_predictive=posterior_predictive)
+
+display(az.summary(idata_numpyro, var_names=["anatase_fraction"], kind="all"))
+az.plot_trace(idata_numpyro, var_names=["anatase_fraction"])
+az.plot_ppc(idata_numpyro, num_pp_samples=100)
+```
+
+Use Bambi one step earlier, when there are calibration measurements for a phase-sensitive
+instrument. In this deliberately small example, the calibration rows are invented. The model learns
+how the response changes with a known anatase fraction; it does not replace the custom mineral
+inversion above.
+
+```{python}
+#| label: toy-bambi-calibration
+#| code-fold: show
+#| eval: false
+import bambi as bmb
+
+toy_calibration = DataFrame({
+    "instrument_response": [0.04, 0.13, 0.21, 0.31, 0.37],
+    "anatase_fraction": [0.05, 0.12, 0.20, 0.30, 0.35],
+})
+calibration_model = bmb.Model("instrument_response ~ anatase_fraction",
+                              toy_calibration, family="gaussian")
+idata_bambi = calibration_model.fit(
+    draws=2_000, tune=1_000, chains=4, inference_method="numpyro",
+    random_seed=20260907
+)
+display(az.summary(idata_bambi, kind="all"))
+```
+
+### Posterior prediction checks the stated observation model
+
+**Question.** After fitting, is the invented observation surprising under the fitted teaching model?
+
+Draw matched $t^{(d)}$ values from the grid posterior and then
+$y_{\mathrm{rep}}^{(d)}\sim N(t^{(d)},\sigma_y^2)$.
+
+```{python}
+#| label: toy-posterior-predictive
+#| code-fold: show
+#| fig-cap: "Is the invented phase-sensitive observation compatible with its teaching model? The observed 28 wt% lies within the central 90% posterior-predictive interval."
+#| fig-alt: "Density curve of replicated phase-sensitive observations with a dashed vertical line at the invented observed value of 28 weight percent."
+rng_predictive = np.random.default_rng(24680)
+draw_index = rng_predictive.choice(len(t_grid), size=5000, p=posterior_mass)
+t_draw = t_grid[draw_index]
+y_rep = rng_predictive.normal(t_draw, sigma_y)
+predictive_interval = np.quantile(y_rep, [.05, .95])
+assert np.isfinite(y_rep).all()
+assert predictive_interval[0] < y_observed < predictive_interval[1]
+predictive_data = DataFrame({"Replicated observation (wt%)": 100 * y_rep})
+predictive_plot = (
+    ggplot(predictive_data, aes("Replicated observation (wt%)"))
+    + geom_density(fill="#56B4E9", alpha=.45, color="#0072B2")
+    + geom_vline(xintercept=100 * y_observed, color="#D55E00",
+                 linetype="dashed", size=1)
+    + labs(x="Invented phase-sensitive response (wt%)", y="Predictive density")
+    + theme_minimal()
+    + theme(figure_size=(7, 4.2), text=element_text(size=11))
+)
+display(predictive_plot)
+print(f"Central 90% posterior-predictive interval: "
+      f"{100*predictive_interval[0]:.2f} to {100*predictive_interval[1]:.2f} wt%")
+```
+
+**What this means.** The invented datum is compatible with the stated prior, likelihood and noise scale. **What it does not mean.** The chemistry is correct, the phases are identified in reality, or the intervals are calibrated. Sensitivity to the prior centre, concentration and $\sigma_y$ remains part of the analysis.
+
+## From the grid to high-dimensional NUTS
+
+The grid is deliberately small enough to see. It works only because this example has one unknown
+direction. A larger model might let several mineral fractions and parts of the chemistry vary at
+once. That creates a posterior with many constrained, correlated unknowns, where the No-U-Turn
+Sampler (**NUTS**) is more useful than a rectangular grid.
+
+Getting samples out of NUTS is only the start. Split rank-normalised $\widehat R$, bulk and tail
+effective sample sizes, divergences and tree-depth hits tell us whether the chains were explored
+well enough to summarise them. Assay reconstruction and posterior-predictive checks ask something
+else: can the stated observation model reproduce the relevant parts of the data? Prior and
+likelihood sensitivity then show how much the answer depends on modelling choices. None of that,
+by itself, proves the geology is right.
+
+When chemistry is uncertain, an abundance draw and its matching chemistry draw need to stay
+together:
+
+$$
+\left(C_s^{(d)},m_s^{(d)}\right)
+\longmapsto
+\widehat a_s^{(d)}=C_s^{(d)}m_s^{(d)}.
+$$ {#eq-matched-posterior-reconstruction}
+
+Here $s$ indexes a sample and $d$ indexes one posterior draw. The reconstruction
+$\widehat a_s^{(d)}$ is therefore a prediction from one internally consistent model state:
+
+$$
+a_{s,\mathrm{rep}}^{(d)}
+\sim N\!\left(\widehat a_s^{(d)},\Sigma_{a,s}\right).
+$$ {#eq-assay-posterior-predictive}
+
+Multiplying separate posterior means $E[C]E[m]$ discards their dependence and may describe no
+posterior state at all. Independent grain chemistry can inform a chemistry prior; paired modal
+labels supervise a predictive map; geological groupings structure a prior; and phase-sensitive
+measurements change the likelihood. They are different sources of information, not interchangeable
+decorations.
+
+## Conclusion
+
+EMC earns its place because routine assays are cheap, dense and already part of most mining
+workflows. With a credible phase list and mineral chemistry, it can give a fast, consistent first
+estimate of mineral groups, check samples against their chemistry, and show where scarce
+mineralogical work will matter most. That is useful, especially when the decision is about an
+aggregate the assay can actually identify.
+
+The trouble starts when a neat output is treated as a measurement. Two minerals can have the same
+bulk-chemical signature; omitted phases, unsuitable mineral chemistry, unmeasured volatiles,
+inconsistent units and analytical error can all make an exact-looking allocation wrong. Closure,
+optimisation, a Bayesian prior and a neural network can make a calculation more useful. None of
+them manufactures the phase-specific information the assay does not contain.
+
+The most useful EMC result is often a boundary rather than one more precise-looking number: this
+total is recoverable; this split is not; here is the residual; and here is the next measurement
+that would change the decision. For the toy mixture, “40 wt% total titanium phase, with anatase
+and rutile unresolved” is more honest and more useful than a made-up polymorph split.
+
+Use EMC to work through a set of assays, then say plainly which parts of the answer were measured,
+which were assumed, and where direct mineralogy still has to do the work.
+
+::: {.table-scroll tabindex="0" role="region" aria-label="Method-family decision table; scroll horizontally on narrow screens"}
+
+| Method family | Information added | Useful role | Practical burden | Main failure mode |
+| --- | --- | --- | --- | --- |
+| Pseudoinverse / NNLS / closure | Constraints or a selection convention | Fast baseline and transparent reconstruction | Low; requires a declared phase list and units | Reports a convention as if it were identified mineralogy |
+| LP bounds | Feasibility constraints | Honest ranges for identifiable totals and endpoints | Low–moderate; exact or tolerance choices need documenting | Empty or misleading feasible set under noisy/misaligned assays |
+| Staged allocation | Ordering and tie-break rules | Auditable operational recipe | Low; sensitive to order and compatibility rules | Order-dependent attribution hides unresolved alternatives |
+| Genetic search | Candidate list, objective and random seed | Explore nonlinear or combinatorial candidate recipes | Moderate–high; repeated seeds and residual checks are needed | Seed variability or misspecified phases mistaken for discovery |
+| Labels / neural models | Paired modal labels and learned mapping | Fast prediction when deployment data resemble training data | High; needs representative labels and out-of-domain checks | Shortcut learning, poor calibration or mass-balance mismatch |
+| Bayesian model | Prior structure, likelihood and any extra measurements | Quantify conditional uncertainty and sensitivity | High; diagnostics, posterior checks and matched draws | Prior/likelihood assumptions mistaken for new chemical information |
+
+:::
+
+This table is a decision aid, not a ranking. The right family depends on what information is
+available and, more importantly, what decision needs to be defended.
+
+::: {.callout-note collapse="true"}
+## Reproducing the toy example
+
+For the visible toy program, use Python 3.11+ with:
+
+~~~bash
+python -m pip install numpy scipy pandas plotnine jupyter arviz pymc numpyro bambi
+~~~
+
+No cell reads external data, discovers a project root or accesses a network. The setup cell imports
+standard scientific Python libraries. NumPy supplies linear algebra and random generators; SciPy
+supplies explicit optimisation primitives; pandas DataFrames hold tables and every visual's data;
+Plotnine authors the figures (Plotnine contributors, n.d.). Quarto is needed only to render the
+article.
+:::
+
+The toy mixture ends where a real EMC study should end: the assay supports 40 wt% total anatase
+plus rutile, but it cannot separate the two. That is not an incomplete answer. It tells us whether
+the total is enough for the decision at hand, and, if it is not, what needs to be measured next.
+
+If you are working through a mineral-allocation decision, start by auditing the assay basis and
+phase list. Then ask what is genuinely recoverable before deciding on the smallest additional
+measurement that would change the decision.
+
+The explanatory rhythm and recurring-example approach were inspired by Heiss (2024) and Robinson (2014); the prose, calculations, visuals and code here are original.
+
+## References
+
+ArviZ Developers (n.d.) *ArviZ documentation*. Available at: <https://python.arviz.org/en/stable/>.
+
+Bambi Developers (n.d.) *Bambi FAQ*. Available at: <https://bambinos.github.io/bambi/faq.html>.
+
+Berry, R.F., Hunt, J.A. and McKnight, S.W. (2011) ‘Estimating mineralogy in bulk samples’, in *Proceedings of the 1st International Geometallurgy Conference (GeoMet 2011)*. Perth: AusIMM. [Local background paper.]
+
+Heiss, A. (2024) ‘Demystifying causal inference estimands: ATE, ATT, and ATU’, *Andrew Heiss*, 21 March. Available at: <https://doi.org/10.59350/c9z3a-rcq16> (Accessed: 7 September 2026).
+
+Johnson, L.J., Chu, C.H. and Hussey, G.A. (1985) ‘Quantitative clay mineral analysis using simultaneous linear equations’, *Clays and Clay Minerals*, 33(2), pp. 107--117. [Local background paper.]
+
+Mena Silva, C., Sorensen, B.E., Aasly, K. and Ellefmo, S.L. (2018) ‘Geometallurgical approach to the element-to-mineral conversion for the Nabbaren nepheline syenite deposit’, *Minerals*, 8(8), 325. Available at: <https://doi.org/10.3390/min8080325>.
+
+NumPy Developers (n.d.) *numpy.linalg.pinv*. NumPy documentation. Available at: <https://numpy.org/doc/stable/reference/generated/numpy.linalg.pinv.html> (Accessed: 7 September 2026).
+
+NumPyro Contributors (n.d.) *NumPyro documentation*. Available at: <https://num.pyro.ai/en/stable/>.
+
+Parian, M., Lamberg, P., Mockel, R. and Rosenkranz, J. (2015) ‘Analysis of mineral grades for geometallurgy: Combined element-to-mineral conversion and quantitative X-ray diffraction’, *Minerals Engineering*, 82, pp. 25--35. Available at: <https://doi.org/10.1016/j.mineng.2015.04.023>.
+
+Plotnine contributors (n.d.) *Plotnine documentation*. Available at: <https://plotnine.org/> (Accessed: 7 September 2026).
+
+PyMC Developers (n.d.) *PyMC documentation*. Available at: <https://www.pymc.io/projects/docs/en/stable/>.
+
+Rodrigues, A.A., Grose, L., Ailleres, L., Halley, S., Escolme, A., Armit, R., Harandi, M. and Cracknell, M. (2023) ‘Pedras: Modal mineralogy approximations from assay data using Bayesian inference’, *GeoBerlin 2023*. Available at: <https://doi.org/10.48380/2r85-w395>.
+
+Robinson, D. (2014) ‘Understanding the beta distribution (using baseball statistics)’, *Variance Explained*, 20 December. Available at: <http://varianceexplained.org/statistics/beta_distribution_and_baseball/> (Accessed: 7 September 2026).
+
+SciPy Community (n.d.a) *scipy.stats.dirichlet*. SciPy documentation. Available at: <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.dirichlet.html> (Accessed: 7 September 2026).
+
+SciPy Community (n.d.b) *linprog*. SciPy documentation. Available at: <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linprog.html> (Accessed: 7 September 2026).
+
+SciPy Community (n.d.c) *minimize(method='SLSQP')*. SciPy documentation. Available at: <https://docs.scipy.org/doc/scipy/reference/optimize.minimize-slsqp.html> (Accessed: 7 September 2026).
+
+SciPy Community (n.d.d) *nnls*. SciPy documentation. Available at: <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.nnls.html> (Accessed: 7 September 2026).
+
+Whiten, W.J. (2008) ‘Calculation of mineral composition from chemical assays’, *Mineral Processing and Extractive Metallurgy Review*, 29(2), pp. 83–97. Available at: <https://doi.org/10.1080/08827500701257860>.
