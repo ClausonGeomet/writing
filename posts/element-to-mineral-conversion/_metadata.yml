@@ -21,9 +21,13 @@ format:
     canonical-url: false
     include-in-header:
       text: |
+        <meta name="robots" content="index,follow,max-image-preview:large">
+        <meta name="theme-color" content="#f4f1e9">
         <link rel="canonical" href="https://clausongeomet.com/writing/posts/element-to-mineral-conversion/" data-external="1">
         <meta property="og:url" content="https://clausongeomet.com/writing/posts/element-to-mineral-conversion/">
         <meta property="og:type" content="article">
+        <meta property="og:image:alt" content="Clauson Geomet — Statistical geometallurgy for better decisions">
+        <meta name="twitter:image:alt" content="Clauson Geomet — Statistical geometallurgy for better decisions">
 reader-intro: |
   **What you will take away**
 
