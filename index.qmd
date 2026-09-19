@@ -1,6 +1,12 @@
 ---
 title: "Blog"
 description: "Technical articles on geometallurgy, mineral inference and defensible decisions by Matt Clauson."
+format:
+  html:
+    include-in-header:
+      text: |
+        <meta property="og:url" content="https://clausongeomet.com/writing/">
+        <meta property="og:type" content="website">
 listing:
   contents: posts/*/index.qmd
   type: default
