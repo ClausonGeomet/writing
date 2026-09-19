@@ -1,34 +1,55 @@
 /*-- scss:defaults --*/
-$body-color: #24313d;
-$headings-color: #17222c;
-$link-color: #0d5b78;
-$link-hover-color: #083f54;
-$font-family-sans-serif: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+$body-bg: #f4f1e9;
+$body-color: #1f3143;
+$headings-color: #1f3143;
+$link-color: #2f7080;
+$link-hover-color: #1f3143;
+$navbar-bg: #f4f1e9;
+$navbar-fg: #1f3143;
+$font-family-sans-serif: Inter, "Segoe UI", system-ui, sans-serif;
 $font-family-monospace: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+$code-block-bg: #faf8f3;
 
 /*-- scss:rules --*/
-body {
-  line-height: 1.65;
+body{line-height:1.65;-webkit-font-smoothing:antialiased}
+h1,h2,h3{letter-spacing:-.035em;line-height:1.15}
+#title-block-header{margin-bottom:2rem}
+.quarto-title-meta-heading{color:#326573}
+.navbar{border-bottom:1px solid rgba(31,49,67,.17);padding-block:16px}
+.navbar-brand{padding:0;max-width:65%}
+.navbar-brand img.navbar-logo{max-height:78px;width:240px;max-width:100%;object-fit:contain}
+.navbar .nav-link{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+.navbar .navbar-nav .nav-link.active{font-weight:700;text-decoration:underline;text-underline-offset:6px}
+#quarto-content,#quarto-document-content,main.content,main.content section,.cell,.cell-output,.cell-output-display,.quarto-layout-panel,.quarto-layout-cell{min-width:0;max-width:100%}
+main.content{overflow-wrap:break-word}
+#quarto-document-content .cell-output-display,#quarto-document-content .table-scroll,#quarto-document-content .table-responsive{max-width:100%;overflow-x:auto}
+#quarto-document-content .sourceCode,#quarto-document-content pre{max-width:100%;overflow-x:auto}
+#quarto-document-content pre{border:1px solid rgba(31,49,67,.12);border-radius:3px}
+#quarto-document-content pre code{white-space:pre-wrap;overflow-wrap:anywhere}
+#quarto-document-content img,#quarto-document-content svg{max-width:100%;height:auto}
+#quarto-document-content .math.display,#quarto-document-content mjx-container[display="true"]{display:block;max-width:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:.35rem}
+#quarto-document-content .quarto-title h1{overflow-wrap:anywhere;font-size:clamp(2rem,4.6vw,3.4rem)}
+#quarto-document-content p a,#quarto-document-content li a{overflow-wrap:anywhere}
+details.code-fold{margin-block:1rem;max-width:100%;min-width:0}
+details.code-fold>summary{color:#2f7080;font-size:.9rem;font-weight:600;cursor:pointer;padding:8px 0}
+.listing-title a{text-decoration-thickness:.08em;text-underline-offset:.12em}
+.quarto-listing-category{border-radius:2px;font-size:.78rem;border-color:rgba(31,49,67,.2)!important}
+.quarto-listing-default .quarto-post{border-color:rgba(31,49,67,.17)}
+.quarto-post .body{min-width:0}
+.quarto-post .listing-title{font-weight:650;line-height:1.25}
+.reader-takeaways,.reader-contact{background:#faf8f3;padding:24px 28px;margin-block:26px;border-left:3px solid #98aa9a;max-width:100%}
+.reader-takeaways p:first-child,.reader-contact p:first-child{color:#1f3143;font-weight:700;font-size:1.08rem;margin-bottom:10px}
+.reader-takeaways p:last-child,.reader-contact p:last-child{margin-bottom:0}
+.reader-contact{margin-top:48px}
+.nav-footer{border-top:1px solid rgba(31,49,67,.17);color:#45525d;font-size:.85rem}
+a:focus-visible,summary:focus-visible,button:focus-visible{outline:2px solid #2f7f8f;outline-offset:4px}
+@media(max-width:767px){
+  .navbar-brand img.navbar-logo{max-height:64px;width:195px}
+  .navbar{padding-block:10px}
+  #quarto-document-content{padding-inline:0}
+  .reader-takeaways,.reader-contact{padding:20px}
+  .quarto-post{min-width:0;max-width:100%}
+  .quarto-post .body,.quarto-post .metadata{min-width:0;max-width:100%}
+  #quarto-document-content .cell-output-display table{font-size:.85rem}
 }
-
-#title-block-header {
-  margin-bottom: 2rem;
-}
-
-.quarto-title-meta-heading {
-  color: $link-color;
-}
-
-.listing-title a {
-  text-decoration-thickness: 0.08em;
-  text-underline-offset: 0.12em;
-}
-
-.quarto-listing-category {
-  border-radius: 0.2rem;
-  font-size: 0.85rem;
-}
-
-pre {
-  border-radius: 0.25rem;
-}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}

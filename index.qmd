@@ -1,13 +1,13 @@
 ---
-title: "Writing"
-description: "Notes on geometallurgy, mineral inference, and defensible technical decisions."
+title: "Blog"
+description: "Technical articles on geometallurgy, mineral inference and defensible decisions by Matt Clauson."
 listing:
   contents: posts/*/index.qmd
   type: default
-  fields: [date, author, title, subtitle, categories, description]
+  fields: [date, author, title, categories, description]
   sort: "date desc"
   categories: true
   feed: true
 ---
 
-Essays and practical notes on turning technical evidence into decisions that can be inspected and defended.
+Essays and practical notes on turning geological and processing evidence into decisions that can be inspected and defended.

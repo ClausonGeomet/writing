@@ -9,10 +9,29 @@ project:
     - posts/**/rendered-report.html
 
 website:
-  title: "Writing"
-  description: "Notes on geometallurgy, mineral inference, and defensible technical decisions."
+  title: "Clauson Geomet — Blog"
+  description: "Technical writing on geometallurgy, mineral inference and defensible decisions by Matt Clauson."
   site-url: "https://clausongeomet.com/writing/"
+  favicon: "https://clausongeomet.com/assets/logo-mark-final.png"
+  image: "https://clausongeomet.com/assets/social-preview.png"
+  image-alt: "Clauson Geomet — Statistical geometallurgy for better decisions"
+  open-graph:
+    locale: en_AU
+    image: "https://clausongeomet.com/assets/social-preview.png"
+    image-width: 1200
+    image-height: 630
+  twitter-card:
+    card-style: summary_large_image
+    image: "https://clausongeomet.com/assets/social-preview.png"
+    image-width: 1200
+    image-height: 630
   navbar:
+    title: false
+    logo: "https://clausongeomet.com/assets/logo-lockup-final.png"
+    logo-alt: "Clauson Geomet"
+    logo-href: "https://clausongeomet.com/"
+    background: "#f4f1e9"
+    foreground: "#1f3143"
     left:
       - text: Home
         href: https://clausongeomet.com/
@@ -23,14 +42,29 @@ website:
       - text: Tools
         href: https://clausongeomet.com/tools/
     right:
+      - text: Contact
+        href: https://clausongeomet.com/#contact
       - icon: rss
         href: index.xml
         aria-label: RSS feed
   page-footer:
     left: "© 2026 Matt Clauson · CC BY 4.0"
+    right: "[Discuss a project](https://clausongeomet.com/#contact) · [Clauson Geomet](https://clausongeomet.com/)"
+    background: "#f4f1e9"
+
+filters:
+  - filters/reader-experience.lua
 
 format:
   html:
     theme: [cosmo, styles.scss]
     toc: true
+    code-fold: true
+    code-summary: "View code"
+    code-overflow: wrap
     link-external-newwindow: true
+    include-in-header:
+      text: |
+        <meta name="robots" content="index,follow,max-image-preview:large">
+        <meta name="theme-color" content="#f4f1e9">
+    include-after-body: includes/analytics.html

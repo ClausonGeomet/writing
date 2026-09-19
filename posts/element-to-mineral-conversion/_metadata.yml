@@ -13,3 +13,17 @@ categories:
   - mass balance
   - uncertainty
 draft: false
+reader-intro: |
+  **What you will take away**
+
+  A good match to an assay does not necessarily identify a unique mineral mixture. This worked synthetic example shows how to distinguish what the chemistry supports, what depends on assumptions, and which additional measurement could improve the decision.
+
+  Read the interpretation first; expand the code when you want to examine the implementation.
+reader-contact: |
+  **Working with assay data and limited mineralogy?**
+
+  Get in touch to discuss whether your conversion method supports the decision you need to make.
+
+  [Discuss an element-to-mineral problem](mailto:matthewclauson@outlook.com?subject=Element-to-mineral%20conversion%20enquiry) · [Explore Clauson Geomet](https://clausongeomet.com/)
+
+  Please avoid sending confidential datasets in an initial enquiry.
