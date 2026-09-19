@@ -14,6 +14,16 @@ categories:
   - mass balance
   - uncertainty
 draft: false
+# The article embeds resources. Its canonical URL must remain a normal web URL,
+# rather than being fetched and embedded by the self-contained HTML renderer.
+format:
+  html:
+    canonical-url: false
+    include-in-header:
+      text: |
+        <link rel="canonical" href="https://clausongeomet.com/writing/posts/element-to-mineral-conversion/" data-external="1">
+        <meta property="og:url" content="https://clausongeomet.com/writing/posts/element-to-mineral-conversion/">
+        <meta property="og:type" content="article">
 reader-intro: |
   **What you will take away**
 
