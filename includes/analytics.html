@@ -1,2 +1,12 @@
-<!-- Cloudflare Web Analytics: the same public site token as the consultancy homepage. -->
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-external="1" data-cf-beacon='{"token":"f19f7dc5e664422d9f7bcd49982e9f7c"}'></script>
+<!-- Cloudflare Web Analytics: the same public site token as the consultancy homepage.
+     Load dynamically so Quarto's embed-resources post-processor does not try to
+     treat the external module URL as a local file during site rendering. -->
+<script>
+(function () {
+  var script = document.createElement("script");
+  script.defer = true;
+  script.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  script.setAttribute("data-cf-beacon", '{"token":"f19f7dc5e664422d9f7bcd49982e9f7c"}');
+  document.head.appendChild(script);
+})();
+</script>
