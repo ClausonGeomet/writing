@@ -1,6 +1,12 @@
 ---
 title: "From elements to minerals: what an assay can tell us"
 subtitle: "A consultancy case study in mass balance, ambiguity and defensible decisions"
+author:
+  - name: "Matt Clauson"
+    url: "https://clausongeomet.com/"
+    affiliation:
+      - name: "Clauson Geomet"
+        url: "https://clausongeomet.com/"
 date: 2026-09-07
 lang: en-AU
 format:
