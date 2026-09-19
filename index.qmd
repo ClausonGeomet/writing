@@ -5,8 +5,12 @@ format:
   html:
     include-in-header:
       text: |
+        <meta name="robots" content="index,follow,max-image-preview:large">
+        <meta name="theme-color" content="#f4f1e9">
         <meta property="og:url" content="https://clausongeomet.com/writing/">
         <meta property="og:type" content="website">
+        <meta property="og:image:alt" content="Clauson Geomet — Statistical geometallurgy for better decisions">
+        <meta name="twitter:image:alt" content="Clauson Geomet — Statistical geometallurgy for better decisions">
 listing:
   contents: posts/*/index.qmd
   type: default
