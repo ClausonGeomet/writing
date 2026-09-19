@@ -4,6 +4,7 @@ description: "Notes on geometallurgy, mineral inference, and defensible technica
 listing:
   contents: posts/*/index.qmd
   type: default
+  fields: [date, author, title, subtitle, categories, description]
   sort: "date desc"
   categories: true
   feed: true
