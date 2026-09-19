@@ -14,7 +14,15 @@ function Pandoc(doc)
   local function panel(key, id, class)
     local value = doc.meta[key]
     if not value then return nil end
-    local blocks = pandoc.read(pandoc.utils.stringify(value), 'markdown').blocks
+    local kind = pandoc.utils.type(value)
+    local blocks
+    if kind == 'Blocks' then
+      blocks = value
+    elseif kind == 'Inlines' then
+      blocks = {pandoc.Para(value)}
+    else
+      blocks = pandoc.read(pandoc.utils.stringify(value), 'markdown').blocks
+    end
     return pandoc.Div(blocks, pandoc.Attr(id, {class}))
   end
 
