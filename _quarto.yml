@@ -14,7 +14,6 @@ website:
   site-url: "https://clausongeomet.com/writing/"
   favicon: "https://clausongeomet.com/assets/logo-mark-final.png"
   image: "https://clausongeomet.com/assets/social-preview.png"
-  image-alt: "Clauson Geomet — Statistical geometallurgy for better decisions"
   open-graph:
     locale: en_AU
     image: "https://clausongeomet.com/assets/social-preview.png"
@@ -67,4 +66,6 @@ format:
       text: |
         <meta name="robots" content="index,follow,max-image-preview:large">
         <meta name="theme-color" content="#f4f1e9">
+        <meta property="og:image:alt" content="Clauson Geomet — Statistical geometallurgy for better decisions">
+        <meta name="twitter:image:alt" content="Clauson Geomet — Statistical geometallurgy for better decisions">
     include-after-body: includes/analytics.html
