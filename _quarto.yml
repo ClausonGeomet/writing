@@ -14,8 +14,14 @@ website:
   site-url: "https://clausongeomet.com/writing/"
   navbar:
     left:
+      - text: Home
+        href: https://clausongeomet.com/
       - href: index.qmd
-        text: Writing
+        text: Blog
+      - text: Packages
+        href: https://clausongeomet.com/packages/
+      - text: Tools
+        href: https://clausongeomet.com/tools/
     right:
       - icon: rss
         href: index.xml
