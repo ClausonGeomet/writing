@@ -1,6 +1,6 @@
 # Clauson Geomet — Writing
 
-Public technical writing by **Matt Clauson / Clauson Geomet** on geometallurgy, mineral inference, statistical methods and defensible technical decision-making.
+Public technical writing by **Matt Clauson / Clauson Geomet** on geometallurgy, minerals, statistics and other things I find interesting.
 
 **Read the published articles:**  
 https://clausongeomet.com/writing/
