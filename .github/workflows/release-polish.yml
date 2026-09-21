@@ -1,0 +1,56 @@
+name: Release article rendering checks
+on:
+  push:
+    branches: [release/linkedin-polish-20260921]
+    paths:
+      - .github/release_polish.py
+      - .github/workflows/release-polish.yml
+permissions:
+  contents: read
+jobs:
+  polish:
+    if: github.repository == 'ClausonGeomet/writing' && github.ref == 'refs/heads/release/linkedin-polish-20260921'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/linkedin-polish-20260921
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: Apply prose-only corrections
+        run: |
+          python -m py_compile .github/release_polish.py
+          python .github/release_polish.py apply
+      - name: Install locked article environment
+        run: uv sync --frozen
+      - name: Render complete blog with executable examples
+        run: uv run quarto render
+      - name: Install browser checks without changing project dependencies
+        run: uv run --with beautifulsoup4 --with playwright playwright install --with-deps chromium
+      - name: Verify rendered maths, code outputs and responsive article
+        run: |
+          uv run --with beautifulsoup4 --with playwright python .github/release_polish.py check
+          cat .release-checks/summary.md >> "$GITHUB_STEP_SUMMARY"
+          git diff --check
+      - name: Retain rendering evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: article-release-checks
+          path: .release-checks/
+          retention-days: 14
+      - name: Commit checked article corrections to release branch only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- posts/element-to-mineral-conversion/index.qmd posts/element-to-mineral-conversion/_metadata.yml
+          git diff --cached --check
+          git diff --cached --stat
+          git commit -m 'Fix inline maths and clarify the synthetic EMC example'
+          git push origin HEAD:refs/heads/release/linkedin-polish-20260921
+          git rev-parse HEAD
