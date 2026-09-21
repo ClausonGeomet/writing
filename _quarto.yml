@@ -41,6 +41,8 @@ website:
       - text: Tools
         href: https://clausongeomet.com/tools/
     right:
+      - text: CV PDF
+        href: https://clausongeomet.com/assets/Matthew-Clauson-CV.pdf
       - text: Contact
         href: https://clausongeomet.com/#contact
       - icon: rss
