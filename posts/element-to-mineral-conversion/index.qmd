@@ -1,6 +1,5 @@
 ---
 title: "From elements to minerals: what an assay can tell us"
-subtitle: "A consultancy case study in mass balance, ambiguity and defensible decisions"
 author:
   - name: "Matt Clauson"
     url: "https://clausongeomet.com/"
@@ -251,7 +250,7 @@ C^{\mathrm{elem}}_{ij}=\frac{n_{ij}M_i}{\sum_k n_{kj}M_k},\qquad
 a^{\mathrm{oxide}}=a^{\mathrm{element}}\frac{M_{\mathrm{oxide}}}{\nu M_{\mathrm{element}}}.
 $$
 
-Here \(n_{ij}\) is the count of element \(i\) in mineral \(j\), \(M\) is molar mass and \(\nu\) is the relevant element count in the oxide. If FeO is converted to Fe2O3-equivalent, the multiplier \(159.69/143.69\) changes the reporting basis; it does not infer oxidation state. Measured grain chemistry can replace ideal formulae. Missing water, CO2, unassayed elements and solid solution mean real columns need not sum to one.
+Here $n_{ij}$ is the count of element $i$ in mineral $j$, $M$ is molar mass and $\nu$ is the relevant element count in the oxide. If FeO is converted to Fe2O3-equivalent, the multiplier $159.69/143.69$ changes the reporting basis; it does not infer oxidation state. Measured grain chemistry can replace ideal formulae. Missing water, CO2, unassayed elements and solid solution mean real columns need not sum to one.
 :::
 
 **What this means.** A declared recipe and response matrix determine a forward assay. **What it does not mean.** Reversing the calculation will necessarily recover the recipe.
@@ -285,10 +284,7 @@ $$
 m=C^{-1}a.
 $$ {#eq-ordinary-inverse}
 
-The order matters. It is not $a=Cb^{-1}$: $b$ is not part of the notation here, and a matrix
-inverse acts on the left of the assay vector. Some papers instead write the same relationship as
-$b=Ax$, with $b$ for assays, $A$ for mineral chemistry and $x$ for mineral fractions. The letters
-change; the calculation does not.
+The order matters: the inverse acts on the left of the assay vector.
 
 This tidy case is useful for understanding the algebra, but it is uncommon in EMC. Our toy $C$ is
 $2\times3$, so it has two assay rows and three mineral columns. It cannot have an ordinary inverse:
@@ -356,7 +352,7 @@ $$
 m(t)=(0.60,t,0.40-t)^T,\qquad 0\leq t\leq0.40
 $$
 
-has the same assay. **Closure** says fractions sum to one; **non-negativity** excludes negative mass. The matrix has rank two for three fractions. Its null direction \(v=(0,1,-1)^T\) changes the polymorph split while \(Cv=0\). SVD and the pseudoinverse expose this geometry (Whiten, 2008; NumPy Developers, n.d.).
+has the same assay. **Closure** says fractions sum to one; **non-negativity** excludes negative mass. The matrix has rank two for three fractions. Its null direction $v=(0,1,-1)^T$ changes the polymorph split while $Cv=0$. SVD and the pseudoinverse expose this geometry (Whiten, 2008; NumPy Developers, n.d.).
 
 ```{python}
 #| label: toy-inverse
@@ -413,7 +409,7 @@ $$
 Q(m)=\tfrac12\lVert W(Cm-a)\rVert_2^2,
 $$
 
-with \(W=I\) here. NNLS adds \(m\geq0\); equality-constrained fitting also adds \(\mathbf1^Tm=1\). LP reports feasible extrema rather than a preferred point (SciPy Community, n.d.b, n.d.c, n.d.d).
+with $W=I$ here. NNLS adds $m\geq0$; equality-constrained fitting also adds $\mathbf1^Tm=1$. LP reports feasible extrema rather than a preferred point (SciPy Community, n.d.b, n.d.c, n.d.d).
 
 ```{python}
 #| label: toy-method-comparison
@@ -551,7 +547,7 @@ $$
 \text{fitness}(m)=-\lVert C_{\mathcal J}m-a\rVert_2^2,
 $$
 
-and uses 80 candidates, 160 generations, 20 elites, convex crossover and Gaussian mutation. It is deliberately small. The scientific model is the candidate set \(\mathcal J\). We compare exactly four lists:
+and uses 80 candidates, 160 generations, 20 elites, convex crossover and Gaussian mutation. It is deliberately small. The scientific model is the candidate set $\mathcal J$. We compare exactly four lists:
 
 1. **quartz + anatase**: identified exact fit;
 2. **quartz + rutile**: identified exact fit;
