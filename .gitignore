@@ -28,3 +28,8 @@ secrets/
 # Designated non-public inputs
 data/private/
 private/
+
+# Unpublished writing stays local/private.
+# Keep the explanatory README, but ignore draft content by default.
+drafts/*
+!drafts/README.md
