@@ -33,3 +33,6 @@ private/
 # Keep the explanatory README, but ignore draft content by default.
 drafts/*
 !drafts/README.md
+
+/.quarto/
+**/*.quarto_ipynb
