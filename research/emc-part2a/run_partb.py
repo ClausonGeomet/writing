@@ -11,6 +11,7 @@ import scipy
 ROOT=Path(__file__).resolve().parent
 BROOT=ROOT.parent/'emc-part2b'
 FIX=ROOT/'fixtures'; OUT=BROOT/'results'
+UNITS='whole-sample mass fraction'
 CASES=('easy','ambiguous','noisy','missing_phase','wrong_chemistry','infeasible')
 BASE=('Quartz','Hematite','Kaolinite','Forsterite'); AMB=('Quartz','Anatase','Rutile')
 SIGMA=np.array([.010,.008,.003,.006])
@@ -23,6 +24,7 @@ def write_csv(path,rows,fields):
 def main():
     frozen=ROOT/'baseline_freeze.json'
     if not frozen.exists(): raise RuntimeError('freeze Part A first')
+    dependency_hash=json.loads(frozen.read_text())['dependency_commit']
     proto=BROOT/'prototypes/emc_prototypes.py'
     if not proto.exists():
         print('PENDING: prototype absent; run after builder merge')
@@ -75,7 +77,7 @@ def main():
             good=np.isfinite(ah).all(axis=1)&np.isfinite(full).all(axis=1)
             score=mod.score_assays(At[good],ah[good],sigma=sigma,objective=obj,scales=fit.get('scales')) if good.sum()>=2 else {}
             assay_err=ah[good]-At[good]; mineral_err=full[good]-Mt[good]
-            rec=dict(scenario=case,replicate=r,split=split,method=method,objective=obj,search_seed=seed,order=json.dumps(order),status=fit.get('status'),n_total=hi-lo,n_supported=int(good.sum()),unsupported_count=int((~good).sum()),failure_count=sum(x not in ('ok','unsupported_negative_assay') for x in statuses),assay_rmse=float(np.sqrt(np.mean(assay_err**2))) if good.any() else math.nan,standardized_assay_rmse=float(np.sqrt(np.mean((assay_err/sigma)**2))) if good.any() else math.nan,mineral_rmse=float(np.sqrt(np.mean(mineral_err**2))) if good.any() else math.nan,closure_error=float(np.mean(np.abs(full[good].sum(axis=1)-1))) if good.any() else math.nan,unallocated=float(np.mean(ua[good])) if good.any() else math.nan,negative_mass=float(np.sum(np.maximum(-full[good],0))) if good.any() else math.nan,exact_residual=float(np.max(np.abs(assay_err))) if good.any() else math.nan,fit_wall_seconds=fit_wall,fit_cpu_seconds=fit_cpu,evaluations=fit.get('evaluations'),proposals=fit.get('proposals'),train_score=fit.get('train_score'),row_loss=score.get('row'),mean_loss=score.get('mean'),covariance_loss=score.get('covariance'),js_loss=score.get('js'),total_loss=score.get('total'),scales=json.dumps(np.asarray(fit.get('scales')).tolist()) if fit.get('scales') is not None else '')
+            rec=dict(scenario=case,replicate=r,split=split,method=method,objective=obj,search_seed=seed,order=json.dumps(order),status=fit.get('status'),n_total=hi-lo,n_supported=int(good.sum()),unsupported_count=int((~good).sum()),failure_count=sum(x not in ('ok','unsupported_negative_assay') for x in statuses),assay_rmse=float(np.sqrt(np.mean(assay_err**2))) if good.any() else math.nan,standardized_assay_rmse=float(np.sqrt(np.mean((assay_err/sigma)**2))) if good.any() else math.nan,mineral_rmse=float(np.sqrt(np.mean(mineral_err**2))) if good.any() else math.nan,closure_error=float(np.mean(np.abs(full[good].sum(axis=1)-1))) if good.any() else math.nan,unallocated=float(np.mean(ua[good])) if good.any() else math.nan,negative_mass=float(np.sum(np.maximum(-full[good],0))) if good.any() else math.nan,exact_residual=float(np.max(np.abs(assay_err))) if good.any() else math.nan,fit_wall_seconds=fit_wall,fit_cpu_seconds=fit_cpu,evaluations=fit.get('evaluations'),proposals=fit.get('proposals'),train_score=fit.get('train_score'),row_loss=score.get('row'),mean_loss=score.get('mean'),covariance_loss=score.get('covariance'),js_loss=score.get('js'),total_loss=score.get('total'),scales=json.dumps(np.asarray(fit.get('scales')).tolist()) if fit.get('scales') is not None else '',units=UNITS,dependency_hash=dependency_hash)
             records.append(rec)
             for i in range(hi-lo):
               for j,p in enumerate(trueparts):
@@ -94,7 +96,7 @@ def main():
     source=ROOT/'results/observational_equivalence.csv'
     (OUT/'observational_equivalence.csv').write_bytes(source.read_bytes())
     files=[proto,frozen,source,*OUT.glob('*.csv')]
-    manifest=dict(schema='emc-feasibility-1',created_utc=datetime.now(timezone.utc).isoformat(),baseline_freeze_sha256=sha(frozen),status='complete' if len(records)==18*20*3 else 'time_limit_partial',configurations_per_cohort=20,fit_calls=len(records)//3,split=[30,10,20],budget=24,beam_width=2,search_seeds=[101,102,103],runtime=dict(python=platform.python_version(),numpy=np.__version__,scipy=scipy.__version__,pandas=pd.__version__),time=dict(wall_seconds=time.perf_counter()-start,cpu_seconds=time.process_time()-cpu),fit_times=times,sha256={str(p.relative_to(ROOT.parent)):sha(p) for p in files if p.is_relative_to(ROOT.parent)})
+    manifest=dict(schema='emc-feasibility-1',created_utc=datetime.now(timezone.utc).isoformat(),baseline_freeze_sha256=sha(frozen),dependency_hash=dependency_hash,units=UNITS,status='complete' if len(records)==18*20*3 else 'time_limit_partial',configurations_per_cohort=20,fit_calls=len(records)//3,split=[30,10,20],budget=24,beam_width=2,search_seeds=[101,102,103],runtime=dict(python=platform.python_version(),numpy=np.__version__,scipy=scipy.__version__,pandas=pd.__version__),time=dict(wall_seconds=time.perf_counter()-start,cpu_seconds=time.process_time()-cpu),fit_times=times,sha256={str(p.relative_to(ROOT.parent)):sha(p) for p in files if p.is_relative_to(ROOT.parent)})
     (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2,allow_nan=True)+'\n')
     print(manifest['status'],manifest['fit_calls'])
 if __name__=='__main__': main()
