@@ -1,0 +1,14 @@
+{
+  "schema": "emc-historical-freeze-audit-1",
+  "freeze": "freeze_v2/baseline_freeze.json",
+  "status": "historical_incomplete",
+  "expected_references": 56,
+  "verified_references": 55,
+  "missing_reference": "fixtures/manifest.json",
+  "expected_sha256": "b2f7be63c55e6f933152588721fd0477f531103dba6814ce81c666c389b6cf9d",
+  "recovery": "Original bytes unavailable in retained freeze_v2 files, local worktrees, reachable Git history, and inspected unreachable Git objects. No replacement is asserted as the original.",
+  "current_freeze": "baseline_freeze.json",
+  "current_freeze_status": "complete",
+  "current_freeze_verified_references": 55,
+  "current_freeze_expected_references": 55
+}
