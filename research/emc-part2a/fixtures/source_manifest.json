@@ -1,0 +1,177 @@
+{
+  "schema": "emc-feasibility-1",
+  "dependency": {
+    "name": "simCoDaR",
+    "commit": "d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d",
+    "version": "0.1.0.9000",
+    "R": "R version 4.3.3 (2024-02-29)",
+    "RNGkind": ["Mersenne-Twister", "Inversion", "Rejection"]
+  },
+  "basis": "whole-sample mineral mass fraction; oxide wt percent divided by 100 once",
+  "cases": {
+    "easy_r0": {
+      "file": "easy_r0.csv",
+      "seed": 20261026,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "easy_r0_audit.json"
+    },
+    "ambiguous_r0": {
+      "file": "ambiguous_r0.csv",
+      "seed": 20261027,
+      "phase_names": ["Quartz", "Anatase", "Rutile"],
+      "analytes": ["SiO2", "TiO2"],
+      "source": "simCoDaR public API",
+      "audit": "ambiguous_r0_audit.json"
+    },
+    "noisy_r0": {
+      "file": "noisy_r0.csv",
+      "seed": 20261026,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "noisy_r0_audit.json"
+    },
+    "missing_phase_r0": {
+      "file": "missing_phase_r0.csv",
+      "seed": 20261026,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "missing_phase_r0_audit.json"
+    },
+    "wrong_chemistry_r0": {
+      "file": "wrong_chemistry_r0.csv",
+      "seed": 20261026,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "wrong_chemistry_r0_audit.json"
+    },
+    "infeasible_r0": {
+      "file": "infeasible_r0.csv",
+      "seed": 20261026,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "infeasible_r0_audit.json"
+    },
+    "easy_r1": {
+      "file": "easy_r1.csv",
+      "seed": 20261126,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "easy_r1_audit.json"
+    },
+    "ambiguous_r1": {
+      "file": "ambiguous_r1.csv",
+      "seed": 20261127,
+      "phase_names": ["Quartz", "Anatase", "Rutile"],
+      "analytes": ["SiO2", "TiO2"],
+      "source": "simCoDaR public API",
+      "audit": "ambiguous_r1_audit.json"
+    },
+    "noisy_r1": {
+      "file": "noisy_r1.csv",
+      "seed": 20261126,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "noisy_r1_audit.json"
+    },
+    "missing_phase_r1": {
+      "file": "missing_phase_r1.csv",
+      "seed": 20261126,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "missing_phase_r1_audit.json"
+    },
+    "wrong_chemistry_r1": {
+      "file": "wrong_chemistry_r1.csv",
+      "seed": 20261126,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "wrong_chemistry_r1_audit.json"
+    },
+    "infeasible_r1": {
+      "file": "infeasible_r1.csv",
+      "seed": 20261126,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "infeasible_r1_audit.json"
+    },
+    "easy_r2": {
+      "file": "easy_r2.csv",
+      "seed": 20261226,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "easy_r2_audit.json"
+    },
+    "ambiguous_r2": {
+      "file": "ambiguous_r2.csv",
+      "seed": 20261227,
+      "phase_names": ["Quartz", "Anatase", "Rutile"],
+      "analytes": ["SiO2", "TiO2"],
+      "source": "simCoDaR public API",
+      "audit": "ambiguous_r2_audit.json"
+    },
+    "noisy_r2": {
+      "file": "noisy_r2.csv",
+      "seed": 20261226,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "noisy_r2_audit.json"
+    },
+    "missing_phase_r2": {
+      "file": "missing_phase_r2.csv",
+      "seed": 20261226,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "missing_phase_r2_audit.json"
+    },
+    "wrong_chemistry_r2": {
+      "file": "wrong_chemistry_r2.csv",
+      "seed": 20261226,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "wrong_chemistry_r2_audit.json"
+    },
+    "infeasible_r2": {
+      "file": "infeasible_r2.csv",
+      "seed": 20261226,
+      "phase_names": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+      "analytes": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+      "source": "simCoDaR public API",
+      "audit": "infeasible_r2_audit.json"
+    }
+  },
+  "C_true": {
+    "base": [
+      [1, 0, 0.46547809371756804, 0.42705645705837614],
+      [0, 1, 0, 0],
+      [0, 0, 0.3949551759540198, 0],
+      [0, 0, 0, 0.57294354294162386]
+    ],
+    "ambiguous": [
+      [1, 0, 0],
+      [0, 1, 1]
+    ]
+  },
+  "channels": {
+    "base": ["SiO2", "Fe2O3_total", "Al2O3", "MgO"],
+    "ambiguous": ["SiO2", "TiO2"]
+  },
+  "phases": {
+    "base": ["Quartz", "Hematite", "Kaolinite", "Forsterite"],
+    "ambiguous": ["Quartz", "Anatase", "Rutile"]
+  }
+}
