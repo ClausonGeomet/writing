@@ -19,7 +19,7 @@ graph TD
     F["run_feasibility.py"]
     B["run_partb.py"]
     S["summarize.py"]
-    V["provenance.py"]
+    V["reporting_provenance.py"]
   end
   subgraph Methods["Methods"]
     A["baselines.py"]
@@ -45,6 +45,7 @@ graph TD
   D --> Z
   Q --> P
   style D fill:#1e90ff,stroke:#1565c0,color:#fff
+  style V fill:#1e90ff,stroke:#1565c0,color:#fff
 ```
 
 | Module / file | Purpose | Key dependencies | Changed in this run |
@@ -112,3 +113,5 @@ graph TD
 ## Notes
 
 Part B fitting sees assays and chemistry, not mineral truth; truth enters held-out evaluation. The draft remains outside the site's render list. The historical v2 snapshot has one unavailable referenced manifest (55/56); the current freeze verifies 55/55.
+
+The [public amendment](research/emc-part2a/CONTRACT_DEVIATIONS.md) records the Part A `C@m-a` residual and Part B `a-C@m` residual. The original Part A sign contract failed; the old tester oracle was erroneous. Baseline `objective` is a sigma-weighted diagnostic at every returned estimate. The [all-seed analysis](research/emc-part2b/ALL_SEED_ANALYSIS.md) and its exact CSV derivatives cover the saved comparison grid.

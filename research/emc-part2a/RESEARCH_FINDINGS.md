@@ -2,6 +2,8 @@
 
 The current freeze passes its prospective numerical gates: 5,400 baseline fits have status `ok`; constrained positivity and closure errors are below `1e-8`; forward replay is below `1e-10`; easy-case maximum absolute phase error across methods is `4.17e-8`, below `1e-6`. These are synthetic correctness checks, not field validation. The historical v1 13 SLSQP failures and v2 incomplete 55/56 snapshot remain visible; current v3 verifies 55/55.
 
+The [contract amendment](CONTRACT_DEVIATIONS.md) records Part A's frozen residual `reconstructed-a`; Part B uses `a-reconstructed`. The old tester oracle was wrong against the original Part A contract. Focused validation passed the amended convention only. The Part A `objective` field is always a sigma-weighted squared-residual diagnostic at the returned estimate, including ordinary `pinv`/`nnls` estimates; it is not their minimized unweighted fitting objective.
+
 Mean test errors below pool three 20-specimen replicate tests. Values are whole-sample fractions and rounded from [`results/summary.csv`](results/summary.csv). The comparator was fixed before B results: `cls_eq` except `cls_le` for `missing_phase`.
 
 | Scenario | Assay RMSE | Mineral RMSE | Interpretation |
