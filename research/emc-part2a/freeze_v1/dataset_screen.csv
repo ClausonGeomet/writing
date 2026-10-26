@@ -1,0 +1,9 @@
+dataset,scope,blocker,admitted
+Fortescue CSIRO collection6753,"whole-rock XRD/chemistry; prior 23 modeled, 14/5/4 split",proxy chemistry; independent holdout and basis audit absent,False
+Mary-Wildman CSIRO,nine prior bulk XRD/XRF pairs,dry basis and censoring audit needed,False
+Cannington AuScope Cloncurry METAL,TIMA vol% with surface pXRF,volume to mass and specimen basis mismatch,False
+Mantovani 10.3389/fenvs.2023.1179272,ash/grain-bin groups,amorphous material and group join,False
+Qiong local,historical local data,provenance incomplete,False
+2026 lithium 10.3390/min16020139,article,raw data confidential,False
+Koashva 10.1038/s41598-026-52558-9,article accessible,paired raw matrix unverified,False
+simCoDaR IODP,bundled assays,no mineral truth,False

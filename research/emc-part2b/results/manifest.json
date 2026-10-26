@@ -1,0 +1,9 @@
+{
+  "schema": "emc-feasibility-1",
+  "status": "pending_builder_merge",
+  "baseline_freeze_sha256": "7f44da71e04df10378edc38507fd816323b4208e80e81a109cb1d6c0fca57b82",
+  "planned_fit_calls": 360,
+  "planned_configs_per_cohort": 20,
+  "reason": "prototype absent in isolated simulator worktree; tester executes research/emc-part2a/run_partb.py after merge",
+  "observational_equivalence_sha256": "b864af49da4c7ceac2128458773a0cbdc2a115718b05493e6c73411318935fdd"
+}
