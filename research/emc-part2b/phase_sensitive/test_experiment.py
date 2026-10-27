@@ -33,6 +33,27 @@ def test_seed_inventory_and_disjointness():
     assert 20261027 in manifest["historical_seed_set"]
 
 
+def test_complete_source_and_accepted_history_without_draws():
+    source = study.source_manifest()
+    assert {"measurement_experiment.py", "generation.R", "test_experiment.py",
+            "phase_models.py", "test_phase_models.py"} == {Path(p).name for p in source}
+    parent = study.parent_source_provenance()
+    assert parent["path"].endswith("prior_guided/calibration_models.py")
+    assert parent["sha256"] == study.digest(study.REPO / parent["path"])
+    assert "no import" in parent["use"]
+    records, seeds = study.historical_seeds()
+    paths = {r["path"] for r in records}
+    assert any("REQ-20261026-emc-part2/sim-spec.md" in p for p in paths)
+    assert any("REQ-20261027-finite-calibration/sim-spec.md" in p for p in paths)
+    assert any("attempts/correction-001/manifests/seeds.json" in p for p in paths)
+    assert all("research/emc-part2b/phase_sensitive/" not in p and
+               "runs/REQ-20261027-phase-sensitive/" not in p
+               for p in paths)
+    assert {101, 102, 103, 20261026, 20261027, 20361128} <= seeds
+    assert all(r["sha256"] == study.digest(r["path"]) and r["scope"]
+               for r in records)
+
+
 def test_covariance_channels_and_full_stack():
     assert np.linalg.matrix_rank(study.C) == 2
     assert np.linalg.matrix_rank(np.vstack([study.C, study.H])) == 3

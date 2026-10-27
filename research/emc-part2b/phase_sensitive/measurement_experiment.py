@@ -100,13 +100,36 @@ def design_gate(config, review):
 
 def source_paths():
     return [HERE / p for p in ("measurement_experiment.py", "generation.R", "test_experiment.py",
-                               "phase_models.py")]
+                               "phase_models.py", "test_phase_models.py")]
 
 
 def source_manifest():
     paths = source_paths()
     require(all(p.exists() for p in paths), "merged builder source or simulator test absent")
     return {str(p.relative_to(REPO)): digest(p) for p in paths}
+
+
+def parent_source_provenance():
+    # The parent is a read-only comparator, not an imported implementation.
+    parent = REPO / "research/emc-part2b/prior_guided/calibration_models.py"
+    require(parent.is_file(), "frozen parent source absent")
+    for path in source_paths():
+        tree = ast.parse(path.read_text()) if path.suffix == ".py" else None
+        if tree is not None:
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    require(all(not alias.name.endswith("calibration_models") for alias in node.names),
+                            "parent model import requires source freeze")
+                if isinstance(node, ast.ImportFrom):
+                    require(not (node.module or "").endswith("calibration_models"),
+                            "parent model import requires source freeze")
+    return {"path": str(parent.relative_to(REPO)), "sha256": digest(parent),
+            "use": "read-only reference; no import or call by study code"}
+
+
+def complete_source_manifest(cfg):
+    return {"files": source_manifest(), "parent_reference": parent_source_provenance(),
+            "public_package": pinned_package(cfg)}
 
 
 def package_tree(root):
@@ -148,17 +171,35 @@ def pinned_package(cfg):
 
 
 def historical_seeds():
-    # Enumerate every accepted seed manifest and historical source schedule. No old draw is run.
-    paths = sorted(REPO.glob("research/**/seeds.json"))
-    paths += sorted(REPO.glob("research/**/*manifest*.json"))
-    paths += sorted(REPO.glob("research/**/preregistration.json"))
-    paths = sorted(set(p for p in paths if HERE not in p.parents))
+    # Fixed accepted PR4/PR5 evidence paths. Never scan current study fixtures/config.
+    repo_files = (
+        "research/emc-part2a/fixtures/source_manifest.json",
+        "research/emc-part2a/fixtures/manifest.json",
+        "research/emc-part2a/freeze_v1/fixture_manifest.json",
+        "research/emc-part2a/freeze_v1/baseline_freeze.json",
+        "research/emc-part2b/results/manifest.json",
+        "research/emc-part2b/prior_guided/finite_calibration/preregistration.json",
+        "research/emc-part2b/prior_guided/finite_calibration/manifests/seeds.json",
+        "research/emc-part2b/prior_guided/finite_calibration/attempts/correction-001/manifests/seeds.json",
+    )
+    run_root = Path("/tmp/emc-part2-workspace/writing/runs")
+    run_files = (
+        "REQ-20261026-emc-part2/sim-spec.md",
+        "REQ-20261027-finite-calibration/sim-spec.md",
+        "REQ-20261027-finite-calibration/preregistration.json",
+    )
     records, values = [], set()
-    for p in paths:
-        try:
-            obj = read(p)
-        except (ValueError, UnicodeError):
-            continue
+    def record(path, scope, found):
+        require(path.is_file(), f"accepted historical seed evidence absent: {path}")
+        found = set(found)
+        values.update(found)
+        records.append({"path": str(path), "sha256": digest(path), "scope": scope,
+                        "explicit_seed_values": sorted(found)})
+
+    for rel in repo_files:
+        p = REPO / rel
+        require(p.is_file(), f"accepted historical seed evidence absent: {p}")
+        obj = read(p)
         found = set()
         def walk(v, key=""):
             if isinstance(v, dict):
@@ -170,22 +211,34 @@ def historical_seeds():
             elif isinstance(v, int) and not isinstance(v, bool) and "seed" in key.lower():
                 found.add(v)
         walk(obj)
-        if p.name == "seeds.json" and isinstance(obj.get("streams"), list):
+        if rel.endswith("results/manifest.json"):
+            found.update(obj["search_seeds"])
+        if rel.endswith("finite_calibration/preregistration.json"):
+            master = obj["rng"]["master_seed"]
+            require(master == 20261027 and obj["replicates"] == 50 and len(obj["cells"]) == 10,
+                    "accepted pilot seed schedule changed")
+            found.add(master)
+            found.update(master + 100000*s + 100*r + j
+                         for s in range(1, 11) for r in range(1, 51) for j in range(1, 5))
+        if rel.endswith("seeds.json"):
             found.update(int(x["seed"]) for x in obj["streams"])
-        values.update(found)
-        records.append({"path": str(p.relative_to(REPO)), "sha256": digest(p),
-                        "explicit_seed_values": sorted(found)})
-    # Accepted finite-calibration pilot has an arithmetic seed schedule; list its master and all scheduled streams.
-    old = REPO / "research/emc-part2b/prior_guided/finite_calibration/preregistration.json"
-    if old.exists():
-        obj = read(old)
-        rng = obj.get("rng", {})
-        master = rng.get("master_seed")
-        if isinstance(master, int):
-            values.add(master)
-            for s in range(1, len(obj.get("cells", [])) + 1):
-                for r in range(1, int(obj.get("replicates", 0)) + 1):
-                    values.update(master + 100000*s + 100*r + j for j in range(1, 11))
+        record(p, "accepted repository PR4/PR5 evidence: " + rel, found)
+    for rel in run_files:
+        p = run_root / rel
+        source = p.read_text()
+        found = set()
+        if rel.startswith("REQ-20261026"):
+            require("20261026+100*r" in source and "20261027+100*r" in source and
+                    "101,102,103" in source, "PR4 run schedule changed")
+            found.update((20261026, 20261027, 101, 102, 103))
+            found.update(base + 100*r for base in (20261026, 20261027) for r in range(3))
+        else:
+            require("20261027+100000*s+100*r+k" in source or p.suffix == ".json",
+                    "PR5 run schedule changed")
+            found.add(20261027)
+            found.update(20261027 + 100000*s + 100*r + j
+                         for s in range(1, 11) for r in range(1, 51) for j in range(1, 5))
+        record(p, "accepted prior workflow run schedule: " + rel, found)
     return records, values
 
 
@@ -246,7 +299,7 @@ def frozen(output, cfg, q, f):
     require(freeze["source_sha256"] == digest(manifests / "source.json"), "freeze source manifest mismatch")
     require(freeze["environment_sha256"] == digest(manifests / "environment.json"), "freeze environment manifest mismatch")
     require(freeze["seeds_sha256"] == digest(manifests / "seeds.json"), "freeze seeds manifest mismatch")
-    require(read(manifests / "source.json") == {"files": source_manifest(), "public_package": pinned_package(cfg)},
+    require(read(manifests / "source.json") == complete_source_manifest(cfg),
             "source changed after freeze")
     require(read(manifests / "environment.json") == environment(cfg), "environment changed after freeze")
     require(read(manifests / "seeds.json") == seed_manifest(), "seed inventory changed after freeze")
@@ -301,6 +354,7 @@ def check(cfg, q, f):
     require(all(np.linalg.eigvalsh(x).min() > 0 for x in (RB, RQ, R4)), "covariance not SPD")
     seed_manifest()
     source_manifest()  # expected to block before builder merge; never copies builder code
+    parent_source_provenance()
     return {"schema": "qar-phase-check-v1", "checked_utc": utc(),
             "design_digest": f["design_digest"], "review_sha256": digest(HERE / "PREEXECUTION_REVIEW.json"),
             "planned": planned_keys(cfg), "verdict": "PASS"}
@@ -312,10 +366,10 @@ def freeze(output, cfg, q, f, correction_reason=None, base=None):
     manifests = output / "manifests"
     require(not (manifests / "freeze.json").exists(), "freeze already exists; preserve record")
     check_result = check(cfg, q, f)
-    package = pinned_package(cfg)
+    source = complete_source_manifest(cfg)
     manifests.mkdir(parents=True, exist_ok=True)
     dump(manifests / "design_freeze.json", f)
-    dump(manifests / "source.json", {"files": source_manifest(), "public_package": package})
+    dump(manifests / "source.json", source)
     dump(manifests / "environment.json", environment(cfg))
     dump(manifests / "seeds.json", seed_manifest())
     if base is not None:
