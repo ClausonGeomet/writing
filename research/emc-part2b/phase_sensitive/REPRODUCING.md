@@ -1,6 +1,6 @@
 # Reproducing and inspecting the bounded study
 
-The audited output is in the **main checkout**, at `research/emc-part2b/phase_sensitive/run/attempts/correction-002/`. It was uncommitted when this report was prepared; this scriber worktree contains the documented source and new reports, not the large output subtree. Preserve the root failed run and `attempts/correction-001/` byte-for-byte. The eight correction-002 data CSVs are byte-identical to correction-001; compare `audit/correction001_data_before.json` with `audit/data_replay_hashes.json`. `manifests/execution.json` lists SHA256 for every generated output; `manifests/correction.json`, `source.json`, `environment.json`, `seeds.json`, `freeze.json`, `design_freeze.json`, `deviations.json`, and `preservation.json` bind the lineage. `audit/postrun_audit.json`, `postchecks_summary.json`, `selective_replay.json`, and the runtime `audit.md` carry independent validation. The large raw CSVs should remain intact; any later compression must preserve their bytes on extraction and keep the manifest interpretable.
+The audited output was generated in the **main checkout** at `research/emc-part2b/phase_sensitive/run/attempts/correction-002/`. It was uncommitted when the initial report was prepared. The complete `run/` tree, including earlier failed attempts, is now preserved in committed [archives with a restoration and byte-check recipe](artifacts/README.md). Restore those archives before following the saved-run instructions below; no raw run files are staged directly in Git. Preserve the root failed run and `attempts/correction-001/` byte-for-byte. The eight correction-002 data CSVs are byte-identical to correction-001; compare `audit/correction001_data_before.json` with `audit/data_replay_hashes.json`. `manifests/execution.json` lists SHA256 for every generated output; `manifests/correction.json`, `source.json`, `environment.json`, `seeds.json`, `freeze.json`, `design_freeze.json`, `deviations.json`, and `preservation.json` bind the lineage. `audit/postrun_audit.json`, `postchecks_summary.json`, `selective_replay.json`, and the runtime `audit.md` carry independent validation.
 
 ## Read-only inspection of the saved run
 
@@ -25,4 +25,16 @@ The six frozen source SHA256s (study-relative) are: `EXPERIMENT_PLAN.md 9f3cbe1e
 
 The frozen environment used Python 3.12.3, NumPy 2.5.3, SciPy 1.18.1, matplotlib 3.11.2, pytest 9.1.1, R 4.3.3, jsonlite 2.0.0, and simCoDaR 0.1.0.9000 from public commit `d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d`; exact R/BLAS/installation provenance and thread settings are in `manifests/environment.json` and `source.json`. The historical-seed gate inventories 11 earlier manifest paths and 2,009 historical integers as well as prior master/search seeds. Its path hashes and collision proof are in runtime `historical-seed-inventory.json` and correction-002 `manifests/seeds.json` (SHA256 `c759ec08ef7b2f7bb6ce497000dfabe783ec1d3c94ee880baadb16d2dfd1a195`). A clean fresh clone alone does **not** recreate that historical runtime inventory or the old blocked attempts. Fresh generation requires reconstructing and independently certifying those legacy inputs and the pinned environment, retaining prior attempts, then using the same unchanged 2,000 seed schedule. Do not claim a clean-clone one-command rerun.
 
-The reported figures are redrawn from saved audited CSVs by the small documentation plotting script archived in the runtime run directory as `results-plotting.py`; it never edits run evidence. Replotting affects only new report assets and does not certify the simulation. Numerical audit PASS and final scientific review status are distinct. The final reviewer is expected to publish its own signed result after assessing these reports and evidence.
+## Redraw the two report figures without generating observations
+
+After [restoring and checking the archives](artifacts/README.md), run this from the repository root. The input is the saved correction-002 summary; choose an **explicit, separate output directory** so the tracked report figures and run evidence are not overwritten:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 MPLCONFIGDIR=/tmp/emc-phase-mpl \
+/tmp/bif-v3-world1-validation-env-20261023/bin/python \
+  research/emc-part2b/phase_sensitive/render_figures.py \
+  --paired-summary research/emc-part2b/phase_sensitive/run/attempts/correction-002/results/paired_summary.csv \
+  --output-dir /tmp/emc-phase-report-figures
+```
+
+This writes `transfer_summary.png` and `direct_vs_transfer.png` into the chosen directory using only `paired_summary.csv`. The script is a report renderer outside the frozen six-file design and five computational sources; it does not run the estimator, generate observations, or change saved evidence. The original PNGs remain in `figures/`. Matplotlib renderer or metadata differences may change PNG bytes across environments without changing the plotted summaries; use the pinned environment above for an exact comparison. Numerical audit PASS and historical pre-execution PASS remain distinct from the current **STOP** in the final independent scientific convergence review, pending R1/R2 follow-up and re-review.
