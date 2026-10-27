@@ -1,0 +1,196 @@
+{
+  "excluded_file_count": 38,
+  "files": [
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/data/calibration_observed.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/data/calibration_truth.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/data/direct_observed.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/data/direct_truth.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/data/evaluation_observed.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/data/evaluation_truth.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/data/pool_observed.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/data/pool_truth.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/access.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/correction.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/design_freeze.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/deviations.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/environment.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/execution.json",
+      "reason": "Disposable copied or altered fixture for source-binding rejection; its result and producing probe script are included.",
+      "recreate": "Restore the six original run archives, then execute corrected-harness-evidence/counterfeit_probe.py in a disposable work directory to rebuild the adversarial fixture."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/freeze.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/generation_log.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/pre_run_checks.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/preservation.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/seeds.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/manifests/source.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/results/acquisition.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/results/bounds.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/results/cohort_metrics.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/results/diagnostics.json",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/results/information.jsonl",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/results/paired_summary.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/results/predictions.csv",
+      "reason": "Disposable copied or altered fixture for source-binding rejection; its result and producing probe script are included.",
+      "recreate": "Restore the six original run archives, then execute corrected-harness-evidence/counterfeit_probe.py in a disposable work directory to rebuild the adversarial fixture."
+    },
+    {
+      "path": "corrected-harness-evidence/counterfeit-input/results/priors.jsonl",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/data/direct_observed.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/data/direct_truth.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/data/evaluation_observed.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/data/evaluation_truth.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/data/pool_observed.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/data/pool_truth.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/results/bounds.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/results/cohort_metrics.csv",
+      "reason": "Disposable copied or altered scoring fixture; the exact diagnostic result and producing probe script are included.",
+      "recreate": "Restore the six original run archives, then execute corrected-harness-evidence/scorer_saved_failure_probe.py and failed_block_detail.py in a disposable work directory."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/results/paired_summary.csv",
+      "reason": "Disposable copied or altered scoring fixture; the exact diagnostic result and producing probe script are included.",
+      "recreate": "Restore the six original run archives, then execute corrected-harness-evidence/scorer_saved_failure_probe.py and failed_block_detail.py in a disposable work directory."
+    },
+    {
+      "path": "corrected-harness-evidence/failed-score-copy/results/predictions.csv",
+      "reason": "Copied fixture symlink to saved input; original target bytes are in the six run archives.",
+      "recreate": "Restore the six original run archives, then run the corresponding retained probe script in a disposable directory; do not dereference a fixture symlink during archive extraction."
+    }
+  ],
+  "schema": "qar-validation-review-exclusions-v1"
+}
