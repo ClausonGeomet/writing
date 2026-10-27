@@ -1,0 +1,25 @@
+# Information gained and transfer limits
+
+This note interprets the bounded saved results in [RESULTS.md](RESULTS.md). The preregistered study compares observations and working priors on the same QAR simplex. It does not infer a geological field distribution.
+
+## Why channel identity matters
+
+For `m=(Q,A,R)`, bulk assays are `Cm=(Q,A+R)`. The direction `v=(0,1,-1)` preserves both bulk channels and the closure sum. A correlated repeat of TiO2 measures the same direction more precisely; its rank remains two in mass coordinates and one on the full simplex tangent. The Anatase channel `hm=A` responds to `v` and lifts tangent rank to two. In cell-1 direct data, this rank gain accompanies a large phase RMSE and measurement-consistent envelope reduction. Rank alone does not predict the size of the transfer effect; noise, intrinsic variation, calibration size and prior mismatch also matter. The full covariance used in fitting retains the bulk/Ti-repeat correlation, and within-unit update covariance retains intrinsic cross-test correlation.
+
+`A0` uses only the target's observed channels, `A1` uses the learned center without target channels, and `A2` combines target channels with a finite working penalty. This exposes how the prior can fill an unmeasured A/R direction and how it can harm prediction when its center is wrong. `A2_P` and `A2_R` compare phase purchases with bulk repeats on the same preselected pool IDs. On independent evaluation targets, **both** use only local bulk; the difference is transferred information from purchased units. The no-update and local-only controls in the complete CSVs help separate local measurement from updating. For a purchased target, whole-unit leave-one-out removes its own bulk and new measurements from the domain update before its local likelihood is used.
+
+## What the primary result says
+
+The k=5 unmeasured paired P−R mass-RMSE means (descriptive SE over 50 cohorts) are -0.000292 (0.000098) accurate, -0.000477 (0.000158) weak, -0.031298 (0.000817) mismatched, and -0.010900 (0.000387) soft wrong-occurrence. These are separate cells, not a pooled estimate. The mismatched prior is still worse than bulk-only A0 after the update: 0.144813 versus 0.092592 mean RMSE. Thus useful phase data can mitigate a false domain center without fully correcting a strong penalty. The weak condition changes prediction strength to 0.01; it does not weaken the information update itself.
+
+The soft occurrence model projects its starting center to A=0 but retains finite unrestricted covariance and the full simplex. Phase evidence can move the mean and target estimate to positive A. The hard model imposes A=0 in every fit and bound. Its k=5 unmeasured P−R difference (-0.000020) cannot be read as recovery of Anatase. Both groups reuse the same cell-4 observations; they differ in feasible-set assumptions. The hard model is a deliberately false control, with working unrestricted `T` held for comparability, not a coherent structural-zero population law.
+
+## Bounds, variation and uncertainty
+
+The prior-free LP envelope uses `|Dm-y| ≤ 3 sqrt(diag(R))` with physical support. This marginal box does not implement a joint correlated Gaussian region. A narrower nonempty envelope after adding a phase row describes feasible masses under that box; an empty one means no mass meets every marginal constraint and is reported with its denominator. Hard support can force A width to zero while making many envelopes infeasible. Neither width nor infeasibility frequency is confidence coverage.
+
+The initial covariance estimate deconvolves declared calibration error, floors tangent eigenvalues, and shrinks the intrinsic estimate. The working mean update combines calibration `M0` and purchased-unit information, projects the center to its declared support, and retains `T+M` in prediction. `M` is an approximate finite-calibration mean uncertainty proxy, not a posterior covariance with calibrated probability statements. Fifty independent cohorts show finite synthetic variation. The paired SE is descriptive and cannot establish field superiority, predictive coverage, or dollar value. Synthetic QXRD errors are unbiased Gaussian, and exchangeability between calibration/pool/evaluation specimens within each single domain is assumed. Spatial change, biased or detection-limited QXRD, and changing mineral assemblages were not tested.
+
+## Next decision
+
+The most actionable next input is **realistic QXRD and assay error characterization**: paired specimens, replicate measurements, bias/detection behavior, and cross-channel covariance. The large direct rank gain and mismatch-cell transfer gain justify examining that assumption; the small accurate/weak transfer gains and residual mismatch harm make information-optimal test selection premature without an empirical error model. After that characterization, a separately authorized information-optimal or spatial transfer design could choose specimens and budgets. This study does not authorize executing either extension.
