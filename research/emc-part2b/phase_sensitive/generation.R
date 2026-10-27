@@ -60,6 +60,18 @@ append <- function(kind, suffix, meta, values) {
   write.table(tab, f, sep = ",", row.names = FALSE, col.names = !file.exists(f),
               append = file.exists(f), quote = TRUE, na = "")
 }
+export_cohort <- function(s, r, truths, observed) {
+  for (kind in kinds) {
+    x <- truths[[kind]]
+    ids <- sprintf("ps1_s%d_r%d_%s_%d", s, r,
+                   switch(kind, calibration="cal",direct="direct",pool="pool",evaluation="eval"),
+                   seq_len(nrow(x)))
+    meta <- data.frame(cell_id=s,cohort_id=r,sample_id=ids)
+    colnames(x) <- c("Q","A","R")
+    append(kind,"truth",meta,x)
+    append(kind,"observed",meta,observed[[kind]])
+  }
+}
 master <- 731900000L
 for (cell in config$cells) {
   s <- as.integer(cell$cell_id)
@@ -69,6 +81,7 @@ for (cell in config$cells) {
     direct <- truth(config$dgp$target_center, 20L, base+2L)
     pool <- truth(config$dgp$target_center, 10L, base+3L)
     eval <- truth(config$dgp$target_center, 30L, base+4L)
+    truths <- list(calibration = cal, direct = direct, pool = pool, evaluation = eval)
     obs <- list(
       calibration = cal + noise(20L, Rq, base+5L),
       direct = direct %*% t(rbind(C,C[2,],c(0,1,0))) + noise(20L,R4,base+6L),
@@ -84,16 +97,7 @@ for (cell in config$cells) {
                     dimnames=list(NULL,c("rep_SiO2","rep_TiO2","QXRD_Q","QXRD_A","QXRD_R")))
     extra[1:5,] <- cbind(rep_bulk, qxrd)
     obs$pool <- cbind(obs$pool, extra)
-    for (kind in kinds) {
-      x <- get(if (kind == "evaluation") "eval" else kind)
-      ids <- sprintf("ps1_s%d_r%d_%s_%d", s, r,
-                     switch(kind, calibration="cal",direct="direct",pool="pool",evaluation="eval"),
-                     seq_len(nrow(x)))
-      meta <- data.frame(cell_id=s,cohort_id=r,sample_id=ids)
-      colnames(x) <- c("Q","A","R")
-      append(kind,"truth",meta,x)
-      append(kind,"observed",meta,obs[[kind]])
-    }
+    export_cohort(s, r, truths, obs)
   }
 }
 cat(sprintf("generation_complete cohorts=%d calls=%d rng=%s\n",

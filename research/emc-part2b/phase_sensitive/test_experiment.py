@@ -6,6 +6,7 @@ import importlib.metadata
 import json
 import os
 from pathlib import Path
+import subprocess
 
 import numpy as np
 import pytest
@@ -101,6 +102,94 @@ def test_r_truth_matrix_conversion_precedes_finite_check():
     source = (study.HERE / "generation.R").read_text()
     assert source.index("x <- as.matrix(raw)") < source.index("storage.mode(x) <- \"double\"")
     assert source.index("storage.mode(x) <- \"double\"") < source.index("any(!is.finite(x))")
+
+
+def test_r_export_contract_all_four_streams_without_draws(tmp_path):
+    script = r'''
+      source_file <- commandArgs(trailingOnly=TRUE)[[1L]]
+      root <- commandArgs(trailingOnly=TRUE)[[2L]]
+      dir.create(root, recursive=TRUE)
+      expressions <- parse(file=source_file)
+      for (expr in expressions) {
+        if (is.call(expr) && identical(expr[[1L]], as.name("<-")) &&
+            is.symbol(expr[[2L]]) &&
+            as.character(expr[[2L]]) %in% c("append", "export_cohort")) eval(expr)
+      }
+      kinds <- c("calibration", "direct", "pool", "evaluation")
+      truths <- list(
+        calibration=matrix(c(.11,.22,.67), nrow=1),
+        direct=matrix(c(.31,.23,.46), nrow=1),
+        pool=matrix(c(.41,.24,.35), nrow=1),
+        evaluation=matrix(c(.51,.25,.24), nrow=1))
+      observed <- list(
+        calibration=matrix(c(.12,.21,.67), nrow=1,
+          dimnames=list(NULL,c("QXRD_Q","QXRD_A","QXRD_R"))),
+        direct=matrix(c(.32,.68,.69,.24), nrow=1,
+          dimnames=list(NULL,c("SiO2","TiO2","redundant_Ti","H_A"))),
+        pool=matrix(c(.42,.58,NA,NA,NA,NA,NA), nrow=1,
+          dimnames=list(NULL,c("SiO2","TiO2","rep_SiO2","rep_TiO2",
+                              "QXRD_Q","QXRD_A","QXRD_R"))),
+        evaluation=matrix(c(.52,.48), nrow=1,
+          dimnames=list(NULL,c("SiO2","TiO2"))))
+      export_cohort(2L, 3L, truths, observed)
+    '''
+    data = tmp_path / "data"
+    result = subprocess.run(
+        ["Rscript", "-e", script, str(study.HERE / "generation.R"), str(data)],
+        capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    expected = {
+        "calibration": ("cal", ["QXRD_Q", "QXRD_A", "QXRD_R"], ".11", ".12"),
+        "direct": ("direct", ["SiO2", "TiO2", "redundant_Ti", "H_A"], ".31", ".32"),
+        "pool": ("pool", ["SiO2", "TiO2", "rep_SiO2", "rep_TiO2",
+                         "QXRD_Q", "QXRD_A", "QXRD_R"], ".41", ".42"),
+        "evaluation": ("eval", ["SiO2", "TiO2"], ".51", ".52"),
+    }
+    assert len(list(data.glob("*.csv"))) == 8
+    for kind, (tag, channels, truth_q, observed_first) in expected.items():
+        with (data / f"{kind}_truth.csv").open(newline="") as handle:
+            truth = csv.DictReader(handle)
+            assert truth.fieldnames == ["cell_id", "cohort_id", "sample_id", "Q", "A", "R"]
+            truth_rows = list(truth)
+        with (data / f"{kind}_observed.csv").open(newline="") as handle:
+            obs = csv.DictReader(handle)
+            assert obs.fieldnames == ["cell_id", "cohort_id", "sample_id", *channels]
+            obs_rows = list(obs)
+        assert len(truth_rows) == len(obs_rows) == 1
+        assert truth_rows[0]["sample_id"] == obs_rows[0]["sample_id"] == f"ps1_s2_r3_{tag}_1"
+        assert float(truth_rows[0]["Q"]) == float(truth_q)
+        assert float(obs_rows[0][channels[0]]) == float(observed_first)
+    with (data / "pool_observed.csv").open(newline="") as handle:
+        pool = next(csv.DictReader(handle))
+    assert all(pool[channel] == "" for channel in expected["pool"][1][2:])
+
+
+def test_correction_freeze_accepts_blocked_first_generation_without_csv(tmp_path, monkeypatch):
+    base = tmp_path / "run"
+    manifests = base / "manifests"
+    manifests.mkdir(parents=True)
+    (manifests / "freeze.json").write_text(json.dumps({"design_digest": "frozen-design"}))
+    (manifests / "seeds.json").write_text(json.dumps({"streams": [731900101]}))
+    (manifests / "execution.json").write_text(json.dumps({"status": "blocked",
+        "reason": "first generator failed before CSV"}))
+    attempt = base / "attempts" / "correction-001"
+    monkeypatch.setattr(study, "check", lambda *_: {"verdict": "PASS"})
+    monkeypatch.setattr(study, "complete_source_manifest", lambda *_: {"source": "repaired"})
+    monkeypatch.setattr(study, "environment", lambda *_: {"environment": "frozen"})
+    monkeypatch.setattr(study, "seed_manifest", lambda: {"streams": [731900101]})
+    monkeypatch.setattr(study, "planned_keys", lambda *_: {"predictions": 350250})
+    study.freeze(attempt, {}, {}, {"design_digest": "frozen-design"},
+                 "calibration truth lookup used missing object name", base)
+    correction = json.loads((attempt / "manifests" / "correction.json").read_text())
+    assert correction["base_execution_sha256"] == study.digest(manifests / "execution.json")
+    assert correction["base_freeze_sha256"] == study.digest(manifests / "freeze.json")
+    assert correction["seeds_sha256"] == study.digest(attempt / "manifests" / "seeds.json")
+    assert correction["automatic_retry"] is False
+    assert json.loads((attempt / "manifests" / "freeze.json").read_text())["source_sha256"]
+    assert not (base / "data").exists() and not (base / "results").exists()
+    assert not (attempt / "data").exists() and not (attempt / "results").exists()
+    assert json.loads((manifests / "execution.json").read_text())["status"] == "blocked"
 
 
 def test_failed_predictions_block_matched_metric():
