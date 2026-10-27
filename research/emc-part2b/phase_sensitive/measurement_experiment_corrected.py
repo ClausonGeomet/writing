@@ -115,7 +115,7 @@ def non_generating_boundary(output, callback, *, preflight, clock=time.monotonic
 def masked_record(keys, rows, n, reason="matched arm failed or missing"):
     """Only accounting fields survive a failed matched block."""
     success = sum(row.get("status") == "ok" for row in rows)
-    failure = sum(row.get("status") != "ok" for row in rows)
+    failure = n - success  # Required rows absent from the block are failures too.
     return {**keys, "status": "unavailable_matched_failure", "reason": reason,
             "n_planned": n, "n_success": success, "n_failure": failure}
 

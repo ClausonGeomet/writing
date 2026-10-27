@@ -57,6 +57,15 @@ class CorrectedHarnessTests(unittest.TestCase):
         self.assertEqual((masked["n_planned"], masked["n_success"], masked["n_failure"]), (2, 1, 1))
         self.assertEqual(set(masked), set(keys) | {"status", "reason", "n_planned", "n_success", "n_failure"})
 
+    def test_mask_counts_missing_required_prediction(self):
+        keys = {"cell_id": 1, "arm": "A2_P"}
+        rows = [{"status": "ok", "mass_RMSE": .2} for _ in range(29)]
+        masked = corrected.masked_record(keys, rows, 30)
+        self.assertEqual((masked["n_planned"], masked["n_success"], masked["n_failure"]),
+                         (30, 29, 1))
+        self.assertEqual(masked["status"], "unavailable_matched_failure")
+        self.assertEqual(set(masked), set(keys) | {"status", "reason", "n_planned", "n_success", "n_failure"})
+
     def test_independent_score_fixture(self):
         row = {"status": "ok", "sample_id": "unit-1", "Q_hat": ".6", "A_hat": ".2",
                "R_hat": ".2", "measurement_design_sse": ".02",
