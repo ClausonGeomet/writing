@@ -1,0 +1,13 @@
+{
+  "command": [
+    "Rscript",
+    "/home/matt/Documents/GitHub/writing/research/emc-part2b/prior_guided/finite_calibration/generation.R",
+    "research/emc-part2b/prior_guided/finite_calibration/preregistration.json",
+    "research/emc-part2b/prior_guided/finite_calibration/attempts/correction-001",
+    "/tmp/qar-pinned-run-zl2yytqh/lib"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "generation_complete cells=10 cohorts=500 chemistry_error=0 rng=Mersenne-Twister/Inversion/Rejection\n",
+  "stop_reason": null
+}

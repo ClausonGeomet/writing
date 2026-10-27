@@ -1,0 +1,27 @@
+{
+  "elapsed_seconds": 2.2446093519683927,
+  "end_utc": "2026-10-27T01:49:15.689037+00:00",
+  "failure": "ContractError: R generation failed (1): Error in is.finite(x) : default method not implemented for type 'list'\nCalls: draw_truth\nExecution halted\n",
+  "output_bytes": 288187,
+  "output_files_sha256": {
+    "data/calibration_observed.csv": "52b59d097950c096f48a0e2bd5807fa914cbdad18333746aa8472d52d5881992",
+    "data/calibration_truth.csv": "52b59d097950c096f48a0e2bd5807fa914cbdad18333746aa8472d52d5881992",
+    "data/evaluation_observed.csv": "77fa10f87009237bfa80a8142c79d580e228eb8f6b04cb5e70274b6a2684c256",
+    "data/evaluation_truth.csv": "52b59d097950c096f48a0e2bd5807fa914cbdad18333746aa8472d52d5881992"
+  },
+  "r_command": [
+    "Rscript",
+    "/home/matt/Documents/GitHub/writing/research/emc-part2b/prior_guided/finite_calibration/generation.R",
+    "research/emc-part2b/prior_guided/finite_calibration/preregistration.json",
+    "research/emc-part2b/prior_guided/finite_calibration",
+    "/tmp/qar-pinned-run-ieszasma/lib"
+  ],
+  "r_stderr": "Error in is.finite(x) : default method not implemented for type 'list'\nCalls: draw_truth\nExecution halted\n",
+  "r_stdout": "",
+  "schema": "qar-execution-v1",
+  "seed_count": 2000,
+  "seed_formula": "master_seed+100000*cell_id+100*cohort_id+stream_id",
+  "source_freeze_sha256": "87a0eadc346941117b8cae1719a4154f900ee7452ccec319390f7491d277f907",
+  "start_utc": "2026-10-27T01:49:13.575954+00:00",
+  "status": "INCOMPLETE"
+}

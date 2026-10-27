@@ -1,0 +1,8 @@
+{
+  "environment_sha256": "da0339b3e4f020316244a436cf64af7f0b4deeef2fbdca0b6806cf1fd259d3ce",
+  "preregistration_sha256": "7ebed9167456add5052cff85f4d2c459da58c6ab46a2d66b35893cec6f59bec1",
+  "schema": "qar-source-environment-freeze-v1",
+  "source_sha256": "e3eaf59c79717c2e2a20c3656b3133236aefbb05f07f11bbfe85aa85ce2ee7f7",
+  "status": "SOURCE_ENVIRONMENT_FROZEN",
+  "timestamp_utc": "2026-10-27T01:49:05.974998+00:00"
+}

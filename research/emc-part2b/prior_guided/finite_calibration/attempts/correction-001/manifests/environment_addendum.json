@@ -1,0 +1,17 @@
+{
+  "historical_command_note": "Existing manifest commands contain absolute paths from the original workspace and record provenance; they are not portable execution instructions.",
+  "interpreter": "CPython 3.13.15",
+  "numeric_library_versions": {
+    "matplotlib": "3.11.1",
+    "numpy": "2.5.2",
+    "scipy": "1.18.1"
+  },
+  "original_manifest_sha256": {
+    "environment": "da0339b3e4f020316244a436cf64af7f0b4deeef2fbdca0b6806cf1fd259d3ce",
+    "freeze": "f39d581fb65ce3dfd1f89d78d74bea6542844e2a60ecccf6035c99e787b0b83c",
+    "source": "a05bdd21f02b808f0c9620dfdc8d3805c23ab7c432672ed04e1dc5cc00b449a9"
+  },
+  "recorded_utc": "2026-10-27T02:15:32.010372+00:00",
+  "schema": "qar-post-execution-environment-addendum-v1",
+  "scope": "Observed after completed correction-001 execution, in the current unchanged .venv interpreter; not a retroactive source/environment freeze or rerun."
+}
