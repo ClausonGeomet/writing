@@ -61,6 +61,45 @@ def test_full_covariance_and_singular_a0_minimum_norm():
     assert np.allclose(anatase_only['mass'], [.4, .2, .4], atol=1e-10)
 
 
+def test_fixed_quartz_singular_ties_and_zero_strength():
+    covariance = np.array([[.0001, .00003], [.00003, .0001]])
+    y = [.62, .39]
+    fixed_prior = pm.fit_initial(
+        [[.6, .2, .2], [.6, .3, .1], [.6, .25, .15]], RC)
+    assert fixed_prior['status'] == 'ok'
+    for method, kwargs in (('A0', {}), ('A2', {'prior': fixed_prior, 'strength': 0})):
+        result = pm.estimate(y, C, covariance, method=method, fixed_quartz=.6, **kwargs)
+        assert result['status'] == 'ok'
+        assert np.allclose(result['mass'], [.6, .2, .2], atol=1e-8, rtol=0)
+        assert result['constraint_violation'] <= 1e-9
+        assert result['kkt_residual'] <= 1e-8
+    for quartz, expected in ((0., [0., .5, .5]), (1., [1., 0., 0.])):
+        result = pm.estimate(y, C, covariance, method='A0', fixed_quartz=quartz)
+        assert result['status'] == 'ok'
+        assert np.allclose(result['mass'], expected, atol=1e-8, rtol=0)
+        assert result['kkt_residual'] <= 1e-8
+    hard = pm.estimate(y, C, covariance, method='A0', fixed_quartz=.6,
+                       support=(True, False, True))
+    assert hard['status'] == 'ok'
+    assert np.allclose(hard['mass'], [.6, 0., .4], atol=1e-8, rtol=0)
+
+
+def test_fixed_quartz_full_rank_correlated_solution():
+    design = np.vstack((C, H))
+    covariance = np.array([[.0001, .00003, .00001],
+                           [.00003, .0001, .00002],
+                           [.00001, .00002, .00008]])
+    y = np.array([.62, .39, .23])
+    weight = np.linalg.inv(covariance)
+    residual_bulk = y[:2] - np.array([.6, .4])
+    expected_a = y[2] + weight[2, :2] @ residual_bulk / weight[2, 2]
+    result = pm.estimate(y, design, covariance, method='A0', fixed_quartz=.6)
+    assert result['status'] == 'ok'
+    assert np.allclose(result['mass'], [.6, expected_a, .4 - expected_a],
+                       atol=1e-8, rtol=0)
+    assert result['kkt_residual'] <= 1e-8
+
+
 def test_correlated_assay_closed_form_oracle():
     design = np.eye(3)
     y = np.array([.48, .37, .25])

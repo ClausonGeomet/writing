@@ -19,6 +19,7 @@ SYMMETRY_TOL = 1e-12
 FEAS_TOL = 1e-9
 KKT_TOL = 1e-8
 RANK_TOL = 1e-10
+REDUCED_RANK_TOL = 1e-12
 TIE_TOL = 1e-12
 ACTIVE_TOL = 1e-9
 
@@ -127,11 +128,22 @@ def _face(H: np.ndarray, f: np.ndarray, E: np.ndarray, rhs: np.ndarray) -> np.nd
         m = m0
     else:
         Q = N.T @ H @ N
-        z = np.linalg.lstsq(Q, N.T @ (f - H @ m0), rcond=SYMMETRY_TOL)[0]
+        Q = (Q + Q.T) / 2
+        eigen, V = np.linalg.eigh(Q)
+        # A restriction of a singular Hessian can acquire a tiny eigenvalue
+        # from forming H and rotating into the face. Compare with the full
+        # Hessian scale: a relative cutoff based only on Q would call a
+        # one-dimensional roundoff eigenvalue identified.
+        cutoff = REDUCED_RANK_TOL * np.linalg.norm(H, ord=2)
+        if eigen[0] < -cutoff:
+            return None
+        identified = eigen > cutoff
+        gradient = N.T @ (f - H @ m0)
+        z = V[:, identified] @ ((V[:, identified].T @ gradient) / eigen[identified])
         m = m0 + N @ z
         # m0 is orthogonal to ker(A), so the least-norm reduced solution
         # gives the minimum Euclidean norm on this stationary affine face.
-        if np.max(np.abs(Q @ z - N.T @ (f - H @ m0))) > KKT_TOL * max(
+        if np.max(np.abs(Q @ z - gradient)) > KKT_TOL * max(
             1., np.linalg.norm(H, np.inf) + np.linalg.norm(f, np.inf)
         ):
             return None
