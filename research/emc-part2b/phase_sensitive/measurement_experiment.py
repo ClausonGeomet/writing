@@ -253,25 +253,35 @@ def frozen(output, cfg, q, f):
     return freeze
 
 
-def certification_gate(output):
+PRE_CASES = {f"D{i:02d}" for i in (*range(1, 13), 16)}
+POST_CASES = {"D13", "D14", "D15"}
+
+
+def certification_gate(output, *, final=False):
     path = output / "audit" / "checks.json"
     require(path.is_file(), "tester deterministic certification missing")
     cases = read(path).get("cases", [])
-    ids = {f"D{i:02d}" for i in range(1, 17)}
-    passed = set()
+    seen = set()
     for case in cases:
         check_id = case.get("check_id")
-        if check_id not in ids:
+        if check_id not in PRE_CASES | POST_CASES:
             continue
-        require(check_id not in passed, f"duplicate certification {check_id}")
+        require(check_id not in seen, f"duplicate certification {check_id}")
+        seen.add(check_id)
+        if check_id in POST_CASES and not final:
+            require(case.get("verdict") in ("PENDING", "NOT_EXECUTED") and
+                    case.get("actual") is None,
+                    f"post-run certification executed before run {check_id}")
+            continue
         require(case.get("verdict") == "PASS" and case.get("actual") is not None and
                 case.get("expected") is not None and case.get("command") and
                 case.get("evidence_path"), f"unexecuted/failed certification {check_id}")
         evidence = (output / case["evidence_path"]).resolve()
         require(evidence.is_relative_to(output.resolve()) and evidence.is_file(),
                 f"certification evidence unavailable {check_id}")
-        passed.add(check_id)
-    require(passed == ids, f"tester D01-D16 certification incomplete: {sorted(ids-passed)}")
+    required = PRE_CASES | POST_CASES if final else PRE_CASES
+    require(required <= seen, f"tester certification incomplete: {sorted(required-seen)}")
+    require(POST_CASES <= seen, f"post-run pending rows missing: {sorted(POST_CASES-seen)}")
     return digest(path)
 
 
@@ -321,7 +331,10 @@ def freeze(output, cfg, q, f, correction_reason=None, base=None):
              "recorded_utc": utc(), "automatic_retry": False})
     dump(output / "audit" / "checks.json", {"cases": [{"check_id": "simulator-preflight",
          "command": "--check", "expected": "PASS", "actual": "PASS", "tolerance": None,
-         "verdict": "PASS", "evidence_path": "manifests/freeze.json"}], "planned": planned_keys(cfg)})
+         "verdict": "PASS", "evidence_path": "manifests/freeze.json"}] +
+         [{"check_id": check_id, "command": "after authorized run", "expected": "PASS",
+           "actual": None, "tolerance": None, "verdict": "PENDING", "evidence_path": None}
+          for check_id in sorted(POST_CASES)], "planned": planned_keys(cfg)})
     dump(manifests / "freeze.json", {"schema": "qar-phase-freeze-v1", "frozen_utc": utc(),
         "design_digest": f["design_digest"], "review_sha256": digest(HERE / "PREEXECUTION_REVIEW.json"),
         "source_sha256": digest(manifests / "source.json"),
@@ -790,7 +803,8 @@ def study_diagnostics(output, cfg, counts, prediction_hash):
 
 def output_hashes(output):
     return {str(p.relative_to(output)): digest(p) for p in sorted(output.rglob("*"))
-            if p.is_file() and p.name not in ("execution.json", "generation_log.json")}
+            if p.is_file() and p.name not in ("execution.json", "generation_log.json")
+            and p != output / "audit" / "checks.json"}
 
 
 def verify(output, cfg, q, f):
@@ -800,11 +814,22 @@ def verify(output, cfg, q, f):
     require(execution["status"] == "complete", "execution not complete")
     require(execution["review_sha256"] == digest(HERE / "PREEXECUTION_REVIEW.json"), "execution review hash")
     require(execution["freeze_sha256"] == digest(output / "manifests" / "freeze.json"), "execution freeze hash")
+    pre_checks = output / "manifests" / "pre_run_checks.json"
+    require(execution["certification_sha256"] == digest(pre_checks), "pre-run certification hash")
+    current = {c.get("check_id"): c for c in read(output / "audit" / "checks.json")["cases"]}
+    for case in read(pre_checks)["cases"]:
+        if case.get("check_id") in PRE_CASES:
+            require(current.get(case["check_id"]) == case, f"pre-run certification changed {case['check_id']}")
+    certification_gate(output, final=True)
     review_time = datetime.fromisoformat(q["reviewed_utc"])
     freeze_time = datetime.fromisoformat(read(output / "manifests" / "freeze.json")["frozen_utc"])
     draw_time = datetime.fromisoformat(execution["first_draw_utc"])
     require(review_time <= freeze_time < draw_time, "review/freeze/draw order")
-    require(execution["output_hashes"] == output_hashes(output), "output hash mismatch")
+    current_hashes = output_hashes(output)
+    require(all(current_hashes.get(path) == sha for path, sha in execution["output_hashes"].items()),
+            "output hash mismatch")
+    require(all(path in execution["output_hashes"] or path.startswith("audit/")
+                for path in current_hashes), "unexpected post-run output")
     return {"verdict": "PASS", "verified_utc": utc(), "counts": execution["counts"]}
 
 
@@ -820,6 +845,10 @@ def execute(output, cfg, q, f):
     require(not (output / "data").exists() and not (output / "results").exists(),
             "existing data/results; use fresh correction attempt")
     require(not (output / "manifests" / "execution.json").exists(), "existing execution ledger")
+    pre_checks = output / "manifests" / "pre_run_checks.json"
+    require(not pre_checks.exists(), "existing pre-run certification snapshot")
+    pre_checks.write_bytes((output / "audit" / "checks.json").read_bytes())
+    require(digest(pre_checks) == certification_sha, "pre-run certification snapshot mismatch")
     deadline = time.monotonic() + 90*60
     manifests = output / "manifests"
     ledger = {"schema":"qar-phase-execution-v1", "status":"started",
@@ -906,7 +935,7 @@ def main():
             result = {"verdict":"FROZEN", "output":str(output)}
         elif args.run:
             execute(output, cfg, q, f)
-            result = {"verdict":"COMPLETE", "output":str(output)}
+            result = {"verdict":"RUN_COMPLETE_PENDING_POSTCHECKS", "output":str(output)}
         else:
             result = verify(output, cfg, q, f)
         print(json.dumps(result, sort_keys=True, allow_nan=False))

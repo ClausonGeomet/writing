@@ -110,5 +110,29 @@ def test_run_requires_all_tester_certificates(tmp_path):
     path.write_text(json.dumps({"cases":[{"check_id":"D01","command":"deterministic",
         "expected":"PASS","actual":"PASS","verdict":"PASS","evidence_path":"audit/evidence.txt"}]}))
     (path.parent / "evidence.txt").write_text("checked")
-    with pytest.raises(RuntimeError, match="D01-D16 certification incomplete"):
+    with pytest.raises(RuntimeError, match="tester certification incomplete"):
+        study.certification_gate(tmp_path)
+
+
+def test_certification_phase_boundary_without_draws(tmp_path):
+    audit = tmp_path / "audit"
+    audit.mkdir()
+    (audit / "evidence.txt").write_text("deterministic evidence")
+    cases = [{"check_id": check_id, "command": "deterministic", "expected": "PASS",
+              "actual": "PASS", "verdict": "PASS", "evidence_path": "audit/evidence.txt"}
+             for check_id in sorted(study.PRE_CASES)]
+    cases += [{"check_id": check_id, "command": "after run", "expected": "PASS",
+               "actual": None, "verdict": "PENDING", "evidence_path": None}
+              for check_id in sorted(study.POST_CASES)]
+    path = audit / "checks.json"
+    path.write_text(json.dumps({"cases": cases}))
+    study.certification_gate(tmp_path)
+    with pytest.raises(RuntimeError, match="unexecuted/failed certification D13"):
+        study.certification_gate(tmp_path, final=True)
+    for case in cases:
+        if case["check_id"] in study.POST_CASES:
+            case.update(actual="PASS", verdict="PASS", evidence_path="audit/evidence.txt")
+    path.write_text(json.dumps({"cases": cases}))
+    study.certification_gate(tmp_path, final=True)
+    with pytest.raises(RuntimeError, match="post-run certification executed before run"):
         study.certification_gate(tmp_path)
