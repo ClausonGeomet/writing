@@ -268,7 +268,7 @@ def environment(cfg):
     r = json.loads(subprocess.check_output(["Rscript", "-e", script], text=True))
     versions = {}
     imports = {"numpy", "scipy", "matplotlib", "pytest"}
-    for path in source_paths():
+    for path in (p for p in source_paths() if p.suffix == ".py"):
         for node in ast.walk(ast.parse(path.read_text())):
             if isinstance(node, ast.Import):
                 imports.update(alias.name.split(".")[0] for alias in node.names)

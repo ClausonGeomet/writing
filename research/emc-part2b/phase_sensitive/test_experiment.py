@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import csv
+import importlib.metadata
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -52,6 +54,25 @@ def test_complete_source_and_accepted_history_without_draws():
     assert {101, 102, 103, 20261026, 20261027, 20361128} <= seeds
     assert all(r["sha256"] == study.digest(r["path"]) and r["scope"]
                for r in records)
+
+
+def test_environment_probe_with_mixed_python_and_r_sources():
+    cfg, _, _ = study.design_gate(*args())
+    assert {".py", ".R"} <= {p.suffix for p in study.source_paths()}
+    actual = study.environment(cfg)
+    for name in ("numpy", "scipy", "matplotlib", "pytest"):
+        assert actual["packages"][name][name] == importlib.metadata.version(name)
+    assert actual["R"]["R"] and actual["R"]["RNGkind"]
+    assert actual["R"]["packages"]["simCoDaR"]
+    assert actual["R"]["packages"]["jsonlite"]
+    assert actual["R"]["BLAS"] and actual["R"]["LAPACK"]
+    assert actual["thread_environment"] == {
+        name: os.environ.get(name) for name in
+        ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS",
+         "VECLIB_MAXIMUM_THREADS", "NUMEXPR_NUM_THREADS", "R_PARALLEL_NUM_THREADS")}
+    assert all(actual["thread_environment"][name] == "1" for name in
+               ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"))
+    assert actual["numpy_config"]
 
 
 def test_covariance_channels_and_full_stack():
