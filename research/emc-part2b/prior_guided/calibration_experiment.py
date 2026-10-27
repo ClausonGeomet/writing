@@ -24,12 +24,15 @@ REPO = HERE.parents[2]
 PLAN = HERE / "FINITE_CALIBRATION_PLAN.md"
 MODEL = HERE / "calibration_models.py"
 GENERATOR = HERE / "finite_calibration" / "generation.R"
+AMENDMENT = HERE / "finite_calibration" / "manifests" / "correction_amendment.json"
 PIN_REPO = Path("/home/matt/Documents/GitHub/simCoDaR")
 PHASES = ("Quartz", "Anatase", "Rutile")
 CHANNELS = ("SiO2", "TiO2")
 STREAMS = ("calibration_truth", "evaluation_truth", "calibration_noise", "assay_noise")
 CONTRAST_METRICS = ("mass_RMSE", "assay_RMSE_observed", "assay_RMSE_truth")
 PIN = "d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d"
+FIRST_SOURCE_COMMIT = "ccf2c23"
+CORRECTION_ATTEMPT = "correction-001"
 
 
 class ContractError(RuntimeError):
@@ -142,7 +145,8 @@ def seed_rows(config: dict) -> list[dict]:
 
 def source_fingerprint(config_path: Path) -> dict:
     paths = (PLAN, config_path, Path(__file__), GENERATOR, MODEL,
-             HERE / "test_calibration_models.py", HERE / "test_calibration_experiment.py")
+             HERE / "test_calibration_models.py", HERE / "test_calibration_experiment.py",
+             AMENDMENT)
     if any(not p.is_file() for p in paths):
         raise ContractError("merged estimator source is not present yet")
     return {relative(p): sha256(p) for p in paths}
@@ -235,16 +239,89 @@ def freeze_check(config_path: Path, output: Path, *, create: bool) -> dict:
     return config
 
 
-def check_mode(config_path: Path, output: Path) -> None:
+def first_attempt_snapshot(output: Path) -> dict:
+    """Verify the failed first source against git and fingerprint its retained files."""
+    first_source = strict_json(output / "manifests" / "source.json")
+    first_environment = output / "manifests" / "environment.json"
+    first_freeze = strict_json(output / "manifests" / "freeze.json")
+    first_execution = strict_json(output / "manifests" / "execution.json")
+    if first_execution.get("status") != "INCOMPLETE" or "is.finite(x)" not in str(first_execution.get("failure")):
+        raise ContractError("expected retained first draw failure is absent")
+    if first_freeze.get("source_sha256") != sha256(output / "manifests" / "source.json") or first_freeze.get("environment_sha256") != sha256(first_environment):
+        raise ContractError("initial source/environment freeze changed")
+    if first_execution.get("source_freeze_sha256") != sha256(output / "manifests" / "freeze.json"):
+        raise ContractError("initial execution references a different source freeze")
+    for name, digest in first_source["files"].items():
+        old = subprocess.run(["git", "-C", str(REPO), "show", f"{FIRST_SOURCE_COMMIT}:{name}"],
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        if old.returncode or hashlib.sha256(old.stdout).hexdigest() != digest:
+            raise ContractError(f"first source cannot be resolved at {FIRST_SOURCE_COMMIT}: {name}")
+    files = {}
+    for section in ("data", "results", "figures", "manifests"):
+        directory = output / section
+        if directory.is_dir():
+            for path in sorted(directory.rglob("*")):
+                if path.is_file() and path.resolve() != AMENDMENT.resolve():
+                    files[str(path.relative_to(output))] = sha256(path)
+    return {"first_source_commit": FIRST_SOURCE_COMMIT,
+            "first_source_freeze_sha256": sha256(output / "manifests" / "freeze.json"),
+            "first_execution_sha256": sha256(output / "manifests" / "execution.json"),
+            "retained_files_sha256": files}
+
+
+def correction_freeze_check(config_path: Path, output: Path, *, create: bool) -> tuple[dict, Path]:
+    config = prereg_check(config_path, output)
+    snapshot = first_attempt_snapshot(output)
+    attempt = output / "attempts" / CORRECTION_ATTEMPT
+    manifests = attempt / "manifests"
+    source_path = manifests / "source.json"
+    environment_path = manifests / "environment.json"
+    freeze_path = manifests / "freeze.json"
+    correction_path = manifests / "correction.json"
+    sources = source_fingerprint(config_path)
+    environment = pin_environment()
+    if all(p.exists() for p in (source_path, environment_path, freeze_path, correction_path)):
+        if strict_json(source_path).get("files") != sources or strict_json(environment_path).get("environment") != environment:
+            raise ContractError("correction source or environment changed after freeze")
+        correction = strict_json(correction_path)
+        if correction.get("initial_attempt") != snapshot or correction.get("seed_schedule") != config["rng"]["formula"]:
+            raise ContractError("initial attempt or seed schedule changed after correction freeze")
+        frozen = strict_json(freeze_path)
+        if frozen.get("status") != "SOURCE_ENVIRONMENT_FROZEN" or frozen.get("source_sha256") != sha256(source_path) or frozen.get("environment_sha256") != sha256(environment_path) or frozen.get("correction_sha256") != sha256(correction_path):
+            raise ContractError("correction source/environment freeze hash mismatch")
+    elif create:
+        if manifests.exists() or any((attempt / p).exists() for p in ("data", "results", "figures")):
+            raise ContractError("partial correction attempt already exists")
+        dump_json(correction_path, {"schema": "qar-correction-v1", "attempt": CORRECTION_ATTEMPT,
+                                    "reason": "public mineral_fraction data-frame requires numeric matrix conversion",
+                                    "initial_attempt": snapshot, "seed_schedule": config["rng"]["formula"],
+                                    "plan_sha256": sha256(PLAN), "config_sha256": sha256(config_path)})
+        dump_json(source_path, {"schema": "qar-source-v1", "files": sources})
+        dump_json(environment_path, {"schema": "qar-environment-v1", "environment": environment})
+        dump_json(freeze_path, {"schema": "qar-source-environment-freeze-v1",
+                                "status": "SOURCE_ENVIRONMENT_FROZEN", "timestamp_utc": utc(),
+                                "preregistration_sha256": sha256(output / "manifests" / "preregistration_freeze.json"),
+                                "source_sha256": sha256(source_path),
+                                "environment_sha256": sha256(environment_path),
+                                "correction_sha256": sha256(correction_path)})
+    else:
+        raise ContractError("correction freeze missing; run --check --attempt correction-001")
+    return config, attempt
+
+
+def check_mode(config_path: Path, output: Path, attempt: str | None = None) -> None:
     config = prereg_check(config_path, output)
     seed_rows(config)
     environment = pin_environment()
     with tempfile.TemporaryDirectory(prefix="qar-pinned-check-") as temp_name:
         isolated_install(Path(temp_name))
-    freeze_check(config_path, output, create=True)
+    if attempt is None:
+        freeze_check(config_path, output, create=True)
+    else:
+        correction_freeze_check(config_path, output, create=True)
     print(json.dumps({"status": "READY", "cells": 10, "cohorts": 500,
                       "streams": 2000, "pin_tree": environment["pin_tree"],
-                      "generation": "none"}, allow_nan=False))
+                      "generation": "none", "attempt": attempt}, allow_nan=False))
 
 
 def read_csv(path: Path, cols: tuple[str, ...]) -> list[dict]:
@@ -605,9 +682,12 @@ dev.off()
     run_command(["Rscript", "-e", code, str(output)], timeout=90)
 
 
-def execute(config_path: Path, output: Path) -> int:
+def execute(config_path: Path, output: Path, attempt: str | None = None) -> int:
     start = time.monotonic()
-    config = freeze_check(config_path, output, create=False)
+    if attempt is None:
+        config = freeze_check(config_path, output, create=False)
+    else:
+        config, output = correction_freeze_check(config_path, output, create=False)
     cap_time = config["budget"]["max_wall_seconds"]
     cap_bytes = config["budget"]["max_output_bytes"]
     for part in ("data", "results", "figures"):
@@ -682,15 +762,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--attempt", choices=[CORRECTION_ATTEMPT],
+                        help="reviewed correction attempt in a separate output directory")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true", help="verify and freeze merged source; no draws")
     mode.add_argument("--run", action="store_true", help="execute the sole frozen pilot")
     args = parser.parse_args()
     try:
         if args.check:
-            check_mode(args.config, args.output)
+            check_mode(args.config, args.output, args.attempt)
             return 0
-        return execute(args.config, args.output)
+        return execute(args.config, args.output, args.attempt)
     except (ContractError, TimeoutError, ValueError, OSError, subprocess.TimeoutExpired) as exc:
         print(f"BLOCK: {exc}", file=sys.stderr)
         return 2

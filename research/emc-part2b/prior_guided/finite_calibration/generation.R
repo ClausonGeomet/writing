@@ -61,7 +61,11 @@ draw_truth <- function(center, n, seed, fixed_q) {
   d <- simulate_mineral_assay_scenario(spec, n = n, seed = seed,
           library = lib_local, iron_reporting = "total_Fe2O3",
           max_draw_attempts = 1000L)
-  x <- d$truth$mineral_fraction[, phases, drop = FALSE]
+  phase_data <- d$truth$mineral_fraction[, phases, drop = FALSE]
+  if (!all(vapply(phase_data, is.numeric, logical(1))))
+    stop("non-numeric synthetic truth phases")
+  x <- as.matrix(phase_data)
+  storage.mode(x) <- "double"
   if (!is.null(fixed_q)) {
     ar <- x[, "Anatase"] + x[, "Rutile"]
     if (any(ar <= 0)) stop("invalid fixed-Quartz denominator")
