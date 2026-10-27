@@ -1,0 +1,17 @@
+{
+  "schema": "qar-finite-calibration-preregistration-freeze-v1",
+  "status": "PREREG_PASS",
+  "accepted_parent": "8ce5da876c23503819b4fbcdfed2d8a6393cfbe0",
+  "timestamp_utc": "2026-10-27T01:39:23+00:00",
+  "generation_status": "NO_GENERATION",
+  "generation_performed": false,
+  "files": {
+    "research/emc-part2b/prior_guided/FINITE_CALIBRATION_PLAN.md": {
+      "sha256": "a072e61839380215956f7b7319cd1a0ff599af3b5ea30b9c20f26660e103a3dd"
+    },
+    "research/emc-part2b/prior_guided/finite_calibration/preregistration.json": {
+      "sha256": "09bd689b886dc0b979c7bdb4587832b439291b7e5cecded2e645c7086555baaa"
+    }
+  },
+  "source_environment_freeze": "pending after writer merge and before comparative execution"
+}

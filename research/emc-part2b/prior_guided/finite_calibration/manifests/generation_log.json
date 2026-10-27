@@ -1,0 +1,13 @@
+{
+  "command": [
+    "Rscript",
+    "/home/matt/Documents/GitHub/writing/research/emc-part2b/prior_guided/finite_calibration/generation.R",
+    "research/emc-part2b/prior_guided/finite_calibration/preregistration.json",
+    "research/emc-part2b/prior_guided/finite_calibration",
+    "/tmp/qar-pinned-run-ieszasma/lib"
+  ],
+  "returncode": 1,
+  "stderr": "Error in is.finite(x) : default method not implemented for type 'list'\nCalls: draw_truth\nExecution halted\n",
+  "stdout": "",
+  "stop_reason": null
+}

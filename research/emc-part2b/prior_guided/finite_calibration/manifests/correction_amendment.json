@@ -1,0 +1,18 @@
+{
+  "schema": "qar-correction-amendment-v1",
+  "attempt": "correction-001",
+  "status": "PENDING_INDEPENDENT_REVIEW_AND_RETRY",
+  "initial_source_commit": "ccf2c233aed54b3508972c81febc2e83d628b34d",
+  "initial_failure": "R draw_truth: is.finite(x) received a list-backed data frame",
+  "correction": "Select Quartz, Anatase, Rutile from public mineral_fraction and convert numeric data-frame columns to a double matrix before fixed-Quartz arithmetic and is.finite validation.",
+  "seed_schedule": "master_seed+100000*cell_id+100*cohort_id+stream_id",
+  "master_seed": 20261027,
+  "streams": 2000,
+  "cells": 10,
+  "cohorts_per_cell": 50,
+  "plan_change": false,
+  "config_change": false,
+  "random_draw_change": false,
+  "initial_output_policy": "Preserve root data, results, figures, and manifests byte-for-byte; write correction under attempts/correction-001 only.",
+  "outcomes_inspected": false
+}

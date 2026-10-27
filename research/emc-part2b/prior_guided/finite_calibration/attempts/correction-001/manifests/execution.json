@@ -1,0 +1,35 @@
+{
+  "elapsed_seconds": 42.841361787868664,
+  "end_utc": "2026-10-27T01:56:58.977530+00:00",
+  "failure": null,
+  "output_bytes": 20598103,
+  "output_files_sha256": {
+    "data/calibration_observed.csv": "6272225479f09ee0d0ae6885b1074c1c13882d0d2f356274e0a06e5289a9d396",
+    "data/calibration_truth.csv": "2c574775e623f5d55ca290655bb06273bf302f02e471296f3498d4507c149e75",
+    "data/evaluation_observed.csv": "a7451873a8c7e4b3a9d6bf56e042e67e551720a3251db2ad26c3368f79e9f218",
+    "data/evaluation_truth.csv": "3919e0f802fa353f55deeeaeb8458a12611a7ccfd12891a6d87e2d1911cdaa81",
+    "figures/calibration_size.png": "62dc7d858ebdc9a73ff3a7bc2c0cb2bf70033337671c7204f0b964c00f4dbddf",
+    "figures/mass_rmse.png": "e091e187790fe33e4ab7118e6d199b85417f84254f41df2b1c55ee3f1a669c83",
+    "figures/stress.png": "8a3cde9e42607f989729f545ed022fe0f2dec5ae750cffd715ee9200c9e9bdad",
+    "results/cohort_metrics.csv": "e638296e68213d1f5c15f02bc90150953a5d024329ba4377638300e48e8d14f0",
+    "results/diagnostics.json": "e436ef75e83896a88e911884b77e443bc53fb4a8d88a2886e312ccf7211cd00d",
+    "results/paired_summary.csv": "bb07ed892a6d2b266072a9bac9a49d0da80240e448ed25bb4e24ec5869fd6bfd",
+    "results/predictions.csv": "9fae835c0b30eb250a0fe13c7d5e9c5dc4830cbab11e4d8883fa6c9e94e42e22",
+    "results/priors.jsonl": "ceabd9b032a44ec46588c036dd50641a6459f0c0c38fed076e260d39c798a814"
+  },
+  "r_command": [
+    "Rscript",
+    "/home/matt/Documents/GitHub/writing/research/emc-part2b/prior_guided/finite_calibration/generation.R",
+    "research/emc-part2b/prior_guided/finite_calibration/preregistration.json",
+    "research/emc-part2b/prior_guided/finite_calibration/attempts/correction-001",
+    "/tmp/qar-pinned-run-zl2yytqh/lib"
+  ],
+  "r_stderr": "",
+  "r_stdout": "generation_complete cells=10 cohorts=500 chemistry_error=0 rng=Mersenne-Twister/Inversion/Rejection\n",
+  "schema": "qar-execution-v1",
+  "seed_count": 2000,
+  "seed_formula": "master_seed+100000*cell_id+100*cohort_id+stream_id",
+  "source_freeze_sha256": "f39d581fb65ce3dfd1f89d78d74bea6542844e2a60ecccf6035c99e787b0b83c",
+  "start_utc": "2026-10-27T01:56:16.269600+00:00",
+  "status": "COMPLETE"
+}

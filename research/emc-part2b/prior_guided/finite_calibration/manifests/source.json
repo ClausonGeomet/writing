@@ -1,0 +1,12 @@
+{
+  "files": {
+    "research/emc-part2b/prior_guided/FINITE_CALIBRATION_PLAN.md": "a072e61839380215956f7b7319cd1a0ff599af3b5ea30b9c20f26660e103a3dd",
+    "research/emc-part2b/prior_guided/calibration_experiment.py": "e356b104589e36cb71e93295c574cae771a7718fc094c70fa08a35f4bbefde9c",
+    "research/emc-part2b/prior_guided/calibration_models.py": "e23a58cebeb954776c45877af66ed129dc28eba7fc1f1683a2a6575093f7bab2",
+    "research/emc-part2b/prior_guided/finite_calibration/generation.R": "0269c217cea7cb9dec10a0b529cf1a1c34124fe7589dafed8db169364e20e255",
+    "research/emc-part2b/prior_guided/finite_calibration/preregistration.json": "09bd689b886dc0b979c7bdb4587832b439291b7e5cecded2e645c7086555baaa",
+    "research/emc-part2b/prior_guided/test_calibration_experiment.py": "f5b71919dc53585bb259c6e0f83904b8f5749ba03acda2240120bd42acf99b8d",
+    "research/emc-part2b/prior_guided/test_calibration_models.py": "6f7ba9a01378bcea217bd981456c82f3978a55658413b69c75cfc5ccaab04647"
+  },
+  "schema": "qar-source-v1"
+}

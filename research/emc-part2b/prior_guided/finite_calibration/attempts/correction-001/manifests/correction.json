@@ -1,0 +1,27 @@
+{
+  "attempt": "correction-001",
+  "config_sha256": "09bd689b886dc0b979c7bdb4587832b439291b7e5cecded2e645c7086555baaa",
+  "initial_attempt": {
+    "first_execution_sha256": "8277fbd015950d17f376e1c5c376e1cf97f9765eb8addb3f2f178f97afc03b3a",
+    "first_source_commit": "ccf2c23",
+    "first_source_freeze_sha256": "87a0eadc346941117b8cae1719a4154f900ee7452ccec319390f7491d277f907",
+    "retained_files_sha256": {
+      "data/calibration_observed.csv": "52b59d097950c096f48a0e2bd5807fa914cbdad18333746aa8472d52d5881992",
+      "data/calibration_truth.csv": "52b59d097950c096f48a0e2bd5807fa914cbdad18333746aa8472d52d5881992",
+      "data/evaluation_observed.csv": "77fa10f87009237bfa80a8142c79d580e228eb8f6b04cb5e70274b6a2684c256",
+      "data/evaluation_truth.csv": "52b59d097950c096f48a0e2bd5807fa914cbdad18333746aa8472d52d5881992",
+      "manifests/deviations.json": "259509ad2d87b749f0196d64fe7cf0feb00b3e5548e73f59d8b9bb97f7528a8f",
+      "manifests/environment.json": "da0339b3e4f020316244a436cf64af7f0b4deeef2fbdca0b6806cf1fd259d3ce",
+      "manifests/execution.json": "8277fbd015950d17f376e1c5c376e1cf97f9765eb8addb3f2f178f97afc03b3a",
+      "manifests/freeze.json": "87a0eadc346941117b8cae1719a4154f900ee7452ccec319390f7491d277f907",
+      "manifests/generation_log.json": "8d5e3e1b1a506d0dc88a1df366fc1b8728557d27502795430076c5174022abb3",
+      "manifests/preregistration_freeze.json": "7ebed9167456add5052cff85f4d2c459da58c6ab46a2d66b35893cec6f59bec1",
+      "manifests/seeds.json": "eb1bc446b2d316414d787aa1f0bcc4349cd0df9a9fdb7cb15132062dd56ca8aa",
+      "manifests/source.json": "e3eaf59c79717c2e2a20c3656b3133236aefbb05f07f11bbfe85aa85ce2ee7f7"
+    }
+  },
+  "plan_sha256": "a072e61839380215956f7b7319cd1a0ff599af3b5ea30b9c20f26660e103a3dd",
+  "reason": "public mineral_fraction data-frame requires numeric matrix conversion",
+  "schema": "qar-correction-v1",
+  "seed_schedule": "master_seed+100000*cell_id+100*cohort_id+stream_id"
+}

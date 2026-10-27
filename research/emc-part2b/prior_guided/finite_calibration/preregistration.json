@@ -1,0 +1,314 @@
+{
+  "schema": "qar-finite-calibration-v1",
+  "plan_version": 1,
+  "accepted_parent": "8ce5da876c23503819b4fbcdfed2d8a6393cfbe0",
+  "dependency": {
+    "name": "simCoDaR",
+    "commit": "d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d",
+    "library": "/tmp/emc-simcodar-d9/lib",
+    "public_constructor": "new_assay_scenario",
+    "public_generator": "simulate_mineral_assay_scenario",
+    "weights": [
+      1
+    ],
+    "logratio_sd": 0.35,
+    "structural_parts": null,
+    "composition_bounds": null,
+    "iron_reporting": "total_Fe2O3",
+    "max_draw_attempts": 1000
+  },
+  "phase_order": [
+    "Quartz",
+    "Anatase",
+    "Rutile"
+  ],
+  "channels": [
+    "SiO2",
+    "TiO2"
+  ],
+  "C": [
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1
+    ]
+  ],
+  "closure": 1,
+  "evaluation_center": [
+    0.6,
+    0.1,
+    0.3
+  ],
+  "calibration_measurement_law": "y=m+N3(0,qxrd_sd^2 I); independent; signed unclosed; no clipping/censoring",
+  "assay_sd": 0.01,
+  "assay_law": "a=Cm+N2(0,assay_sd^2 I); independent signed",
+  "fixed_quartz_transform": "(.6,.4*x_A/(x_A+x_R),.4*x_R/(x_A+x_R)); fixed q known to all arms",
+  "rng": {
+    "engine": [
+      "Mersenne-Twister",
+      "Inversion",
+      "Rejection"
+    ],
+    "master_seed": 20261027,
+    "formula": "master_seed+100000*cell_id+100*cohort_id+stream_id",
+    "streams": {
+      "1": "calibration_truth",
+      "2": "evaluation_truth",
+      "3": "calibration_noise",
+      "4": "assay_noise"
+    },
+    "normal_fill": "R column-major matrix(rnorm(n*p),nrow=n)"
+  },
+  "replicates": 50,
+  "evaluation_n": 40,
+  "methods": [
+    "A0",
+    "A1",
+    "A2"
+  ],
+  "prior": {
+    "shrinkage": 0.25,
+    "variance_floor": 0.0001,
+    "mean_uncertainty": "M=(T+U^T R U)/n",
+    "individual_covariance": "T+M",
+    "center": "Euclidean projection of raw measurement mean onto common feasible set",
+    "covariance": "U=[(2,-1,-1)/sqrt(6),(0,1,-1)/sqrt(2)]; sample covariance divisor n-1; subtract U^T R U; eigenfloor; shrink .25 toward trace/2 I"
+  },
+  "solver": {
+    "method": "global active-face convex QP; A0 analytical minimum-norm tie-break",
+    "feasibility_atol": 1e-09,
+    "kkt_scaled_atol": 1e-08,
+    "analytic_atol": 1e-08,
+    "analytic_rtol": 0,
+    "covariance_atol": 1e-12,
+    "objective_tie_relative_scale": 1e-12
+  },
+  "budget": {
+    "cells": 10,
+    "cohorts": 500,
+    "fits": 500,
+    "evaluation_specimens": 20000,
+    "arm_predictions": 60000,
+    "public_generator_calls": 1000,
+    "streams": 2000,
+    "max_wall_seconds": 3600,
+    "max_workers": 2,
+    "max_output_bytes": 250000000,
+    "paid_cost": 0
+  },
+  "failure": "stop and preserve; no resampling; all-arm cohort unavailable if any failure; no cell aggregate if incomplete; planned denominator50; correctness requires zero failures",
+  "inference": {
+    "unit": "independent calibration/evaluation cohort",
+    "contrasts": [
+      "A2-A0",
+      "A2-A1"
+    ],
+    "metrics": [
+      "mass_RMSE",
+      "assay_RMSE_observed",
+      "assay_RMSE_truth"
+    ],
+    "summary": "mean paired difference and sampleSD/sqrt(50)",
+    "predictive_intervals": false,
+    "tests": false,
+    "scientific_gain_threshold": null
+  },
+  "freeze": "public plan/config hashes before any generation; source/environment hashes before comparative execution; preserve initial freezes/amendments",
+  "cells": [
+    {
+      "cell_id": 1,
+      "primary": true,
+      "fixed_quartz": 0.6,
+      "calibration_n": 10,
+      "calibration_center": [
+        0.6,
+        0.1,
+        0.3
+      ],
+      "qxrd_sd": 0.02,
+      "strength": 1,
+      "support": [
+        true,
+        true,
+        true
+      ],
+      "label": "fixed"
+    },
+    {
+      "cell_id": 2,
+      "primary": true,
+      "fixed_quartz": 0.6,
+      "calibration_n": 30,
+      "calibration_center": [
+        0.6,
+        0.1,
+        0.3
+      ],
+      "qxrd_sd": 0.02,
+      "strength": 1,
+      "support": [
+        true,
+        true,
+        true
+      ],
+      "label": "fixed"
+    },
+    {
+      "cell_id": 3,
+      "primary": true,
+      "fixed_quartz": 0.6,
+      "calibration_n": 100,
+      "calibration_center": [
+        0.6,
+        0.1,
+        0.3
+      ],
+      "qxrd_sd": 0.02,
+      "strength": 1,
+      "support": [
+        true,
+        true,
+        true
+      ],
+      "label": "fixed"
+    },
+    {
+      "cell_id": 4,
+      "primary": true,
+      "fixed_quartz": null,
+      "calibration_n": 10,
+      "calibration_center": [
+        0.6,
+        0.1,
+        0.3
+      ],
+      "qxrd_sd": 0.02,
+      "strength": 1,
+      "support": [
+        true,
+        true,
+        true
+      ],
+      "label": "variable"
+    },
+    {
+      "cell_id": 5,
+      "primary": true,
+      "fixed_quartz": null,
+      "calibration_n": 30,
+      "calibration_center": [
+        0.6,
+        0.1,
+        0.3
+      ],
+      "qxrd_sd": 0.02,
+      "strength": 1,
+      "support": [
+        true,
+        true,
+        true
+      ],
+      "label": "variable"
+    },
+    {
+      "cell_id": 6,
+      "primary": true,
+      "fixed_quartz": null,
+      "calibration_n": 100,
+      "calibration_center": [
+        0.6,
+        0.1,
+        0.3
+      ],
+      "qxrd_sd": 0.02,
+      "strength": 1,
+      "support": [
+        true,
+        true,
+        true
+      ],
+      "label": "variable"
+    },
+    {
+      "cell_id": 7,
+      "primary": false,
+      "fixed_quartz": null,
+      "calibration_n": 30,
+      "calibration_center": [
+        0.6,
+        0.1,
+        0.3
+      ],
+      "qxrd_sd": 0.02,
+      "strength": 0.01,
+      "support": [
+        true,
+        true,
+        true
+      ],
+      "label": "weak"
+    },
+    {
+      "cell_id": 8,
+      "primary": false,
+      "fixed_quartz": null,
+      "calibration_n": 30,
+      "calibration_center": [
+        0.6,
+        0.3,
+        0.1
+      ],
+      "qxrd_sd": 0.02,
+      "strength": 1,
+      "support": [
+        true,
+        true,
+        true
+      ],
+      "label": "mismatch"
+    },
+    {
+      "cell_id": 9,
+      "primary": false,
+      "fixed_quartz": null,
+      "calibration_n": 30,
+      "calibration_center": [
+        0.6,
+        0.1,
+        0.3
+      ],
+      "qxrd_sd": 0.08,
+      "strength": 1,
+      "support": [
+        true,
+        true,
+        true
+      ],
+      "label": "noisy_qxrd"
+    },
+    {
+      "cell_id": 10,
+      "primary": false,
+      "fixed_quartz": null,
+      "calibration_n": 30,
+      "calibration_center": [
+        0.6,
+        0.1,
+        0.3
+      ],
+      "qxrd_sd": 0.02,
+      "strength": 1,
+      "support": [
+        true,
+        false,
+        true
+      ],
+      "label": "wrong_occurrence"
+    }
+  ]
+}
