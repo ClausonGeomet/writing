@@ -1,6 +1,6 @@
 # Prior sensitivity in the bounded QAR pilot
 
-**27 October 2026 · exploratory, descriptive; independent scientific review pending.** This companion to the [results](FINITE_CALIBRATION_RESULTS.md) uses the ten frozen cells only. Each cell has 50 independent calibration/evaluation cohorts, with 40 held-out evaluation specimens per cohort. The full precision [diagnostics](finite_calibration/attempts/correction-001/results/diagnostics.json), [cohort metrics](finite_calibration/attempts/correction-001/results/cohort_metrics.csv), and [paired contrasts](finite_calibration/attempts/correction-001/results/paired_summary.csv) are authoritative.
+**27 October 2026 · exploratory, descriptive; final internal independent agent review PASS.** This companion to the [results](FINITE_CALIBRATION_RESULTS.md) uses the ten frozen cells only. Each cell has 50 independent calibration/evaluation cohorts, with 40 held-out evaluation specimens per cohort. The full precision [diagnostics](finite_calibration/attempts/correction-001/results/diagnostics.json), [cohort metrics](finite_calibration/attempts/correction-001/results/cohort_metrics.csv), and [paired contrasts](finite_calibration/attempts/correction-001/results/paired_summary.csv) are authoritative.
 
 ## Frozen factors and cohort behavior
 
@@ -33,6 +33,8 @@ A2−A0 and A2−A1 below are mean paired mass RMSE differences ± descriptive S
 The fitted center is the Euclidean projection of the raw noisy calibration mean. In raw-mass tangent coordinates, the estimator deconvolves known QXRD measurement covariance, floors eigenvalues at 0.0001, shrinks by 0.25 toward isotropy, and calls the resulting within-population covariance T. It sets M=(T+R_z)/n for approximate uncertainty of the *unprojected* mean, then uses T+M to form the plug-in precision. Projection, floor and shrinkage can alter center and variance estimates. The 144 floor-affected cohorts, especially 39/44/48 in fixed-Quartz n=10/30/100, show these choices were active, not merely formal. The calibration covariance itself is estimated from finite data and its uncertainty is not integrated. No predictive intervals, coverage, posterior probability, or field error rates follow from T or M.
 
 The QAR assay has response matrix `[[1,0,0],[0,1,1]]`: the vector (0,1,−1) lies in its null space even under closure. No stronger penalty or more precise bulk Ti assay can create information about this direction. There is also irreducible specimen variation around a learned population center. The correct-model synthetic generator deliberately favors the skewed calibrated center over A0’s equal-Ti minimum-norm split; this is a design-specific result, without general empirical or field validity.
+
+The initial independent review STOP and failed first attempt remain part of the pilot record. The R1 follow-up passed 55/55 focused checks, and R2 corrected two audit diagnostic column labels without changing values. The final internal independent agent review passed on 27 October 2026, after examining the pilot at `614c770a3f27b57d702c152c361f24d34d0138a2`; accepted commit `07b3488dfbc6513ad9172655bebe2566fbeaa205` then included the reviewed outputs. This is not external peer review or field validation, and the later bounded phase-sensitive study has separate authorization and a pre-execution review gate.
 
 ## Decision boundary
 
