@@ -24,6 +24,11 @@ TIE_TOL = 1e-12
 ACTIVE_TOL = 1e-9
 
 
+def _computed_symmetric(value: np.ndarray) -> np.ndarray:
+    """Remove floating point antisymmetry from an internally symmetric matrix."""
+    return (value + value.T) / 2
+
+
 def _array(value: object, shape: tuple[int, ...], name: str) -> np.ndarray:
     try:
         raw = np.asarray(value)
@@ -60,7 +65,7 @@ def _symmetric(value: object, n: int, name: str, *, positive: bool = False,
     x = _array(value, (n, n), name)
     if np.max(np.abs(x - x.T)) > SYMMETRY_TOL:
         raise ValueError(f'{name} is nonsymmetric')
-    x = (x + x.T) / 2
+    x = _computed_symmetric(x)
     least = np.linalg.eigvalsh(x)[0]
     if positive and least <= SYMMETRY_TOL:
         raise ValueError(f'{name} must be positive definite')
@@ -128,7 +133,7 @@ def _face(H: np.ndarray, f: np.ndarray, E: np.ndarray, rhs: np.ndarray) -> np.nd
         m = m0
     else:
         Q = N.T @ H @ N
-        Q = (Q + Q.T) / 2
+        Q = _computed_symmetric(Q)
         eigen, V = np.linalg.eigh(Q)
         # A restriction of a singular Hessian can acquire a tiny eigenvalue
         # from forming H and rotating into the face. Compare with the full
@@ -205,13 +210,13 @@ def _failure_prior(reason: str, diagnostics: dict) -> dict:
 
 def _prior(center: np.ndarray, T: np.ndarray, M: np.ndarray, diagnostics: dict) -> dict:
     try:
-        K = U @ np.linalg.solve(T + M, U.T)
+        K = _computed_symmetric(U @ np.linalg.solve(T + M, U.T))
     except np.linalg.LinAlgError:
         return _failure_prior('prior precision solve failed', diagnostics)
     if not np.isfinite(K).all():
         return _failure_prior('nonfinite prior precision', diagnostics)
     return dict(status='ok', reason='', center=center.tolist(), tangent_cov=T.tolist(),
-                mean_cov=M.tolist(), precision=((K + K.T) / 2).tolist(),
+                mean_cov=M.tolist(), precision=K.tolist(),
                 diagnostics=diagnostics)
 
 
@@ -266,13 +271,13 @@ def fit_initial(Y: object, R_cal: object, *, center_support: object = (True, Tru
     floor = _scalar(variance_floor, 'variance_floor', 0, strict=True)
     n = len(y)
     raw_mean = y.mean(axis=0)
-    S = np.cov(y @ U, rowvar=False, ddof=1)
-    Rz = U.T @ R @ U
-    eigen, V = np.linalg.eigh((S - Rz + (S - Rz).T) / 2)
+    S = _computed_symmetric(np.cov(y @ U, rowvar=False, ddof=1))
+    Rz = _computed_symmetric(U.T @ R @ U)
+    eigen, V = np.linalg.eigh(_computed_symmetric(S - Rz))
     floored = np.maximum(eigen, floor)
-    G = (V * floored) @ V.T
-    T = (1 - alpha) * G + alpha * np.trace(G) * np.eye(2) / 2
-    M = (T + Rz) / n
+    G = _computed_symmetric((V * floored) @ V.T)
+    T = _computed_symmetric((1 - alpha) * G + alpha * np.trace(G) * np.eye(2) / 2)
+    M = _computed_symmetric((T + Rz) / n)
     fitted = _solve(np.eye(3), raw_mean, allowed, E, rhs)
     diagnostics = dict(n_cal=n, raw_mean=raw_mean.tolist(), raw_tangent_cov=S.tolist(),
         deconvolved_eigenvalues=eigen.tolist(), floored_eigenvalues=floored.tolist(),
@@ -283,7 +288,7 @@ def fit_initial(Y: object, R_cal: object, *, center_support: object = (True, Tru
     if fitted is None or not np.isfinite(T).all() or not np.isfinite(M).all():
         return _failure_prior('initial center or covariance solve failed', diagnostics)
     center, violation, kkt = fitted
-    P = np.linalg.inv(M)
+    P = _computed_symmetric(np.linalg.inv(M))
     diagnostics.update(mean_information=P.tolist(),
         mean_score=(P @ (U.T @ (center - B))).tolist(),
         mean_constraint_violation=violation, mean_kkt_residual=kkt)
@@ -331,17 +336,17 @@ def update_mean(prior: object, units: object, *, support: object = (True, True, 
             tangent_cov=np.array(T).tolist(), mean_cov=np.array(M0).tolist(),
             precision=np.array(prior['precision']).tolist(), diagnostics=diagnostics)
     try:
-        P = np.linalg.inv(M0)
+        P = _computed_symmetric(np.linalg.inv(M0))
         v = P @ (U.T @ (center - B))
         for unit in selected:
             y, D, R = _observations(unit.get('y'), unit.get('D'), unit.get('cov'))
             A = D @ U
-            V = A @ T @ A.T + R
+            V = _computed_symmetric(A @ T @ A.T + R)
             np.linalg.cholesky(V)
-            P = P + A.T @ np.linalg.solve(V, A)
+            P = _computed_symmetric(P + A.T @ np.linalg.solve(V, A))
             v = v + A.T @ np.linalg.solve(V, y - D @ B)
-        M = np.linalg.inv(P)
-        H = U @ P @ U.T
+        M = _computed_symmetric(np.linalg.inv(P))
+        H = _computed_symmetric(U @ P @ U.T)
         f = U @ v + H @ B
         fitted = _solve(H, f, allowed, E, rhs)
     except np.linalg.LinAlgError:
@@ -387,10 +392,10 @@ def estimate(y: object, D: object, cov: object, prior: object = None, *, method:
             active_support=[int(j) for j in np.flatnonzero(m > ACTIVE_TOL)])
     Wd = np.linalg.solve(R, design)
     Wy = np.linalg.solve(R, obs)
-    H = design.T @ Wd
+    H = _computed_symmetric(design.T @ Wd)
     f = design.T @ Wy
     if method == 'A2' and lam > 0:
-        H = H + lam * K
+        H = _computed_symmetric(H + lam * K)
         f = f + lam * K @ center
     fitted = _solve(H, f, allowed, E, rhs)
     if fitted is None:

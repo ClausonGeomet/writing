@@ -135,6 +135,48 @@ def test_whole_unit_exclusion_and_cross_repeat_covariance():
         pm.update_mean(p, [stack, stack])
 
 
+def test_high_information_full_covariance_prior_can_be_consumed():
+    initial = prior()
+    design = np.vstack((C, H))
+    covariance = 1e-5 * (.7 * np.eye(3) + .3 * np.ones((3, 3)))
+    units = [dict(unit_id=f'unit-{i}', D=design,
+                  y=np.array([.61 + .005 * i, .39 - .005 * i, .24 + .002 * i]),
+                  cov=covariance) for i in range(5)]
+
+    updated = pm.update_mean(initial, units)
+    assert updated['status'] == 'ok'
+    information = np.array(updated['diagnostics']['mean_information'])
+    mean_cov = np.array(updated['mean_cov'])
+    tangent_cov = np.array(updated['tangent_cov'])
+    precision = np.array(updated['precision'])
+    assert np.array_equal(information, information.T)
+    assert np.array_equal(mean_cov, mean_cov.T)
+    assert np.array_equal(precision, precision.T)
+    assert np.allclose(information @ mean_cov, np.eye(2), atol=1e-12, rtol=0)
+    expected_precision = pm.U @ np.linalg.solve(tangent_cov + mean_cov, pm.U.T)
+    assert np.allclose(precision, expected_precision, atol=1e-12, rtol=0)
+
+    center_only = pm.estimate(None, None, None, updated, method='A1')
+    fitted = pm.estimate([.63, .37, .26], design, covariance, updated, method='A2')
+    chained = pm.update_mean(updated, [])
+    assert center_only['status'] == fitted['status'] == chained['status'] == 'ok'
+    assert np.allclose(center_only['mass'], updated['center'], atol=1e-12, rtol=0)
+    assert fitted['constraint_violation'] <= pm.FEAS_TOL
+    assert fitted['kkt_residual'] <= pm.KKT_TOL
+    assert np.array_equal(chained['diagnostics']['mean_information'], information)
+
+    malformed_covariance = covariance.copy()
+    malformed_covariance[0, 1] += 2e-12
+    with raises_value_error('nonsymmetric'):
+        pm.update_mean(initial, [dict(units[0], cov=malformed_covariance)])
+    malformed_prior = dict(updated, diagnostics=dict(updated['diagnostics']))
+    malformed_information = information.copy()
+    malformed_information[0, 1] += 2e-12
+    malformed_prior['diagnostics']['mean_information'] = malformed_information.tolist()
+    with raises_value_error('nonsymmetric'):
+        pm.estimate(None, None, None, malformed_prior, method='A1')
+
+
 def test_information_and_envelope():
     R = np.eye(2) * .001
     info = pm.information(C, R)
