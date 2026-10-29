@@ -22,17 +22,24 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Install pinned simCoDaR revision
+      - name: Check out pinned simCoDaR source
+        uses: actions/checkout@v4
+        with:
+          repository: ClausonGeomet/simCoDaR
+          ref: d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d
+          path: .simCoDaR
+          persist-credentials: false
+      - name: Install pinned simCoDaR from source
         run: |
-          Rscript -e 'install.packages("remotes", repos="https://cloud.r-project.org")'
-          Rscript -e 'remotes::install_github("ClausonGeomet/simCoDaR", ref="d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d", upgrade="never")'
+          Rscript -e 'install.packages("withr", repos="https://cloud.r-project.org")'
+          R CMD INSTALL .simCoDaR
       - name: Install Python tutorial dependencies
         run: python -m pip install -r posts/emc-part2-what-assays-can-tell-us/tutorial/requirements.txt
       - name: Reproduce R and Python tutorial
         run: |
           mkdir -p /tmp/emc-tutorial-data
           Rscript posts/emc-part2-what-assays-can-tell-us/tutorial/generate_data.R /tmp/emc-tutorial-data
-          python posts/emc-part2-what-assays-can-tell-us/tutorial/explore_emc.py /tmp/emc-tutorial-data
+          PYTHONDONTWRITEBYTECODE=1 python posts/emc-part2-what-assays-can-tell-us/tutorial/explore_emc.py /tmp/emc-tutorial-data
       - uses: quarto-dev/quarto-actions/setup@v2
       - name: Render and verify downloadable sources
         run: |
