@@ -12,6 +12,8 @@ format:
     toc-depth: 2
     toc-location: right-body
     css: publication.css
+    code-fold: false
+    code-copy: true
 execute:
   enabled: false
   echo: false
@@ -49,6 +51,12 @@ The inverse calculation is less straightforward than the forward chemical balanc
 
 This was a methodological exploration, not an attempt to demonstrate the superiority of one optimisation algorithm. The initial experiments compare estimators under controlled synthetic conditions, where the generating mineral proportions are known. Separate follow-up experiments examine calibration and phase-sensitive measurements. None constitutes validation on an independently sampled ore deposit.
 
+### How to follow and run this tutorial
+
+The article now alternates theory, code and interpretation. The numerical illustrations use the actual [\`simCoDaR\`](https://github.com/ClausonGeomet/simCoDaR) R interface and the frozen Python functions used in the Part 2A/B experiments. The complete example is available as [a reproducible source folder](tutorial/README.md), with [R generation](tutorial/generate_data.R), [Python analysis](tutorial/explore_emc.py) and the unmodified [baseline](tutorial/baselines.py) and [order-search](tutorial/emc_prototypes.py) modules.
+
+The code forms one small, independently generated teaching cohort (60 specimens), not a rerun of the full six-scenario study. R creates \`emc_data.csv\` and \`emc_C.csv\`; subsequent Python examples use those files. No synthetic mineral truth is given to the fitting or order-selection algorithms. Download all files by cloning the [writing repository](https://github.com/ClausonGeomet/writing), or follow the [step-by-step setup](tutorial/README.md).
+
 ## 1. From a chemical balance to a mineral estimate {#emc-forward}
 
 For a specimen, let $\mathbf m\in\mathbb R^k$ contain the mineral mass fractions, $\mathbf a\in\mathbb R^p$ the measured analyte mass fractions and $C\in\mathbb R^{p\times k}$ the expected chemical contribution of each mineral to each analyte. The observation model is
@@ -70,6 +78,50 @@ The main synthetic system contained quartz, hematite, kaolinite and forsterite. 
 
 These coefficients are drawn from the [frozen simulation fixture](https://github.com/ClausonGeomet/writing/blob/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a/fixtures/manifest.json). The retained components are not a complete accounting of every oxide, hydroxyl or volatile in the minerals. They were not closed to 100% after selection, and an unallocated mass fraction is not automatically a measure of amorphous material.
 
+### Generate mineral compositions and assays with simCoDaR (R)
+
+I generated the synthetic mineral truth using \`simCoDaR\`, my open-source R package for compositional simulation. Domain centres below are hypothetical compositions, not estimates from an ore deposit. The simulator varies positive mineral proportions in log-ratio coordinates and converts the resulting mineral fractions to theoretical oxide assays using fixed mineral formulae.
+
+Install the exact package revision used for the research (R 4.0 or newer):
+
+\`\`\`r
+install.packages("remotes")
+remotes::install_github(
+  "ClausonGeomet/simCoDaR",
+  ref = "d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d",
+  upgrade = "never"
+)
+\`\`\`
+
+The core calculation is deliberately explicit:
+
+\`\`\`r
+library(simCoDaR)
+RNGkind("Mersenne-Twister", "Inversion", "Rejection")
+centres <- rbind(
+  siliceous = c(Quartz=.55, Hematite=.15, Kaolinite=.15, Forsterite=.15),
+  mixed     = c(Quartz=.25, Hematite=.25, Kaolinite=.25, Forsterite=.25)
+)
+scenario <- new_assay_scenario(centres, weights=c(1, 1), logratio_sd=.25)
+draw <- simulate_mineral_assay_scenario(
+  scenario, n=60L, seed=20261026L, iron_reporting="total_Fe2O3"
+)
+phases <- colnames(centres)
+channels <- c("SiO2", "Fe2O3_total", "Al2O3", "MgO")
+M <- as.matrix(draw$truth$mineral_fraction[, phases, drop=FALSE])
+A <- as.matrix(draw$observed$xrf_oxide_wt_percent[, channels, drop=FALSE])/100
+
+pure <- diag(length(phases))
+dimnames(pure) <- list(phases, phases)
+chem <- minerals_to_assay(pure, library=mineral_assay_library(),
+                          basis="fraction", iron_reporting="total_Fe2O3")
+C <- t(as.matrix(chem$oxides_reported[, channels, drop=FALSE]))/100
+stopifnot(max(abs(rowSums(M)-1)) < 1e-10)
+stopifnot(max(abs(M %*% t(C)-A)) < 1e-10)
+\`\`\`
+
+Here \`M\` is known simulated mineral truth; \`A\` contains theoretical oxide-equivalent mass fractions; and \`C\` is the fixed chemical response. The last line tests the forward mass balance rather than assuming it. These are idealised compositional and chemical observations, not XRD or XRF laboratory measurements. The [complete R script](tutorial/generate_data.R) writes the two CSV files consumed below; the exact package revision and RNG policy are part of the reproducibility record.
+
 ### Constrained least squares
 
 The natural starting point is to find mineral masses that minimise assay residuals while satisfying the appropriate physical constraints. For a known, positive-definite analytical error covariance $\Sigma_\epsilon$, a general weighted objective is
@@ -82,6 +134,32 @@ $$
 with $\mathcal F$ denoting the chosen nonnegative and mass-closure feasible set. This expression is a statistical motivation, not a claim that a full field-derived laboratory covariance was estimated in the experiment. The frozen baselines comprised a pseudoinverse, nonnegative least squares (NNLS), diagonally weighted NNLS and constrained least squares with equality or partial closure. The prespecified comparison used equality-constrained least squares, except in the missing-phase scenario, where partial closure was used.
 
 Weighted residuals and closure encode different sources of information. Measurement weights describe the credibility of the laboratory observations; closure describes the assumed completeness of the modelled mineral inventory. The coefficients in $C$ describe mineral chemistry. Treating any of those as an arbitrary tuning device can improve numerical fit without improving geological interpretation.
+
+### Estimate mineral abundances with the original Python solver
+
+The frozen research implementation contains [\`solve()\`](tutorial/baselines.py), using SciPy NNLS or SLSQP according to the specified method. The following calculates an equality-closed estimate for an assay row and checks that the returned estimate and reconstructed chemistry are consistent:
+
+\`\`\`python
+import numpy as np
+import pandas as pd
+from baselines import solve   # Downloaded frozen Part 2A source
+
+phases = ["Quartz", "Hematite", "Kaolinite", "Forsterite"]
+channels = ["SiO2", "Fe2O3_total", "Al2O3", "MgO"]
+data = pd.read_csv("emc_data.csv").sort_values("sample_id")
+response = pd.read_csv("emc_C.csv").set_index("analyte")
+C = response.loc[channels, phases].to_numpy(float)
+A = data[[f"a_{c}" for c in channels]].to_numpy(float)
+M_truth = data[[f"m_{p}" for p in phases]].to_numpy(float)  # Evaluation only
+
+fit = solve(C, A[0], method="cls_eq")
+assert fit["status"] == "ok"
+print("Estimated mineral mass fractions:", fit["m"])
+print("Reconstructed oxide assays:", C @ fit["m"])
+print("Observed oxide assays:", A[0])
+\`\`\`
+
+The constrained solver is minimising a chemical residual, subject to nonnegative masses and closure. It has no access to \`M_truth\`; the synthetic truth is saved only to evaluate whether a chemically plausible answer is actually mineralogically accurate. The full experiment used the additional pseudoinverse, NNLS, weighted-NNLS and partial-closure variants. Their exact implementation, including solver tolerances and legacy residual-sign convention, is retained in the [frozen source](tutorial/baselines.py).
 
 ## 2. Statistical information at the specimen and population scales {#emc-distributions}
 
@@ -104,6 +182,26 @@ There are immediate qualifications. Equation (3) is conditional on fixed $C$ and
 The distinction between singular-value decomposition (SVD) of $C$ and principal-component analysis (PCA) of the observed assays is relevant here. SVD examines the directions in mineral composition that the assumed chemical system can observe. PCA characterises the dominant directions of variation in the measured assays. Large variation along an assay principal component does not imply that all corresponding mineral phases have been identified. An unobserved mineral contrast can remain invisible even with a large sample and accurately estimated assay covariance.
 
 The completed experiments did not fit a standalone method-of-moments estimator for the latent distribution of mineralogy. Instead, they used the moment relationships as motivation for penalties on differences between the observed and reconstructed *assay* means and covariances. This difference in scope matters: matching observable chemical moments is not the same as identifying latent mineral-distribution parameters.
+
+### Calculate the first two moments (Python)
+
+Equation (3) can be verified with the synthetic generator because it retains mineral truth. Using the same \`A\`, \`M_truth\` and \`C\` defined above:
+
+\`\`\`python
+mean_assay = A.mean(axis=0)
+mean_from_minerals = C @ M_truth.mean(axis=0)
+cov_assay = np.cov(A, rowvar=False)
+cov_from_minerals = C @ np.cov(M_truth, rowvar=False) @ C.T
+
+print("Maximum mean discrepancy:",
+      np.max(np.abs(mean_assay - mean_from_minerals)))
+print("Maximum covariance discrepancy:",
+      np.max(np.abs(cov_assay - cov_from_minerals)))
+np.testing.assert_allclose(mean_assay, mean_from_minerals, atol=1e-10)
+np.testing.assert_allclose(cov_assay, cov_from_minerals, atol=1e-10)
+\`\`\`
+
+These small differences verify the *forward* identities with fixed \`C\` and no added analytical noise. They do not estimate an unknown mineral population from assay moments. A latent mineral moment model would have to address the inverse identifiability problem and an appropriate measurement-error covariance.
 
 ### KL divergence and the distributional criterion
 
@@ -141,6 +239,27 @@ The auxiliary terms were added with unit coefficients as a fixed exploratory des
 
 This limitation is not specific to the histogram method. If two mineral distributions induce the same distribution of observable assays, their assay moments and even their full assay probability laws coincide. No chemical-distribution divergence, including KL divergence, can distinguish them using those observations alone.
 
+### Compute the distributional score used in the experiments (Python)
+
+The [frozen \`score_assays()\` function](tutorial/emc_prototypes.py) calculates the rowwise squared residual, the two moment penalties and the marginal histogram JS divergence. This example deliberately perturbs the theoretical assays to make the score components visible; it is a scoring demonstration, not a mineral estimate:
+
+\`\`\`python
+from emc_prototypes import score_assays
+
+A_hat_demo = 0.98 * A
+components = score_assays(
+    A, A_hat_demo, objective="distribution"
+)
+for name in ["row", "mean", "covariance", "js", "total"]:
+    print(f"{name:11s}: {components[name]:.6g}")
+assert np.isclose(
+    components["total"],
+    sum(components[k] for k in ["row", "mean", "covariance", "js"])
+)
+\`\`\`
+
+Inside that function, the marginal histograms use fixed edges at 0, 1/8, …, 1 and open outer bins, and JS divergence uses natural logarithms. The objective is a sum of exploration-stage penalties on **observable assays**; it is not an estimated mineral posterior or a KL fit to a latent mineral distribution. To examine the exact implementation of the KL terms, see [the source of \`score_assays()\`](tutorial/emc_prototypes.py).
+
 ## 3. Sequential mineral allocation and the role of search {#emc-sequential}
 
 A separate hypothesis was motivated by rule-based mineral calculations in which candidate phases are assigned chemical components sequentially. [HSC Geo documentation](https://www.metso.com/globalassets/portfolio/hsc-chemistry/84-geo---mineralogical-calculations-and-mineral-database.pdf) describes staged mineralogical rules and residual chemical accounting, while [Whiten (2008)](https://doi.org/10.1080/08827500701257860) provides the identifiability context. The algorithm implemented here was an original, simplified limiting-component allocator. It was not a reproduction of the full HSC implementation or a model of geological formation sequence.
@@ -164,6 +283,23 @@ Consider a hypothetical composition of 45% quartz, 15% hematite, 20% kaolinite a
 
 The first sequence exhausts the available SiO$_2$ by allocating it to quartz. There is subsequently no SiO$_2$ available for kaolinite or forsterite, despite the measured Al$_2$O$_3$ and MgO. The second order recovers the generating mixture in this illustration. The calculation demonstrates order sensitivity in the chosen greedy rule; it is not another independent result from the frozen simulation and does not imply that the true order would be known for a field sample.
 
+### Reproduce the order-dependence example (Python)
+
+Here the same generated response matrix and one declared mineral composition are used for both orders. The implementation is the actual frozen [\`allocate()\`](tutorial/emc_prototypes.py), rather than a simplified graphic:
+
+\`\`\`python
+from emc_prototypes import allocate
+
+m_example = np.array([.45, .15, .20, .20])
+a_example = C @ m_example
+q_first = allocate(C, a_example, order=(0, 1, 2, 3))
+silicates_first = allocate(C, a_example, order=(2, 3, 0, 1))
+print("Quartz first:    ", np.round(q_first["m"], 4))
+print("Silicates first:", np.round(silicates_first["m"], 4))
+\`\`\`
+
+The ordering tuples refer to quartz, hematite, kaolinite and forsterite, respectively. This isolates the mechanism of the greedy allocation. The first result is not a false observation; it is an intentionally order-sensitive estimate from the same exact synthetic assay.
+
 ### What was optimised by the genetic algorithm?
 
 With four candidate minerals there are $4!=24$ possible complete sequences. This is small enough for exhaustive enumeration, which was included as a reference for the best value of the specified *training score among the 24 orders*. To explore the behaviour of less exhaustive search, I also compared a fixed lexical order, adjacent-swap greedy search, beam search, random search and a genetic algorithm (GA).
@@ -173,6 +309,28 @@ A candidate in the GA was a permutation of mineral names. For each permutation, 
 Consequently, this GA did not directly optimise mineral abundances in a continuous feasible region, infer a mineralogical distribution or estimate a Bayesian posterior. Its role was narrower: to explore the order dependence of a particular greedy decoder. Nor does an exhaustive minimum of the *chemical training objective* guarantee minimum mineral error when several mineral compositions fit the chemistry.
 
 A related mathematical result came later in the investigation. If the greedy assignment is generalised so that each mineral can take any freely chosen specimen-specific fraction of its currently feasible maximum, then every permutation reaches the same final resource-feasible set, provided chemical coefficients and resources remain fixed and nonnegative. In that setting, allocation order is redundant for a common objective defined on the final mineral masses. Order can become relevant again under fixed greedy assignments, shared-fraction constraints or genuinely path-dependent rules, but those are additional assumptions. The [formal reachability argument](https://github.com/ClausonGeomet/writing/blob/e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b/research/emc-part2b/prior_guided/MATHEMATICAL_DESIGN.md) sets out its conditions. This was a useful clarification of what the order-search experiment could and could not show.
+
+### Compare exhaustive order enumeration and the implemented GA (Python)
+
+For the four-mineral example, all 24 permutations can be enumerated. The frozen [\`fit_order()\`](tutorial/emc_prototypes.py) also implements the GA with the same crossover, mutation, seed and proposal budget as the research pilot:
+
+\`\`\`python
+from emc_prototypes import fit_order, predict_order
+
+train, validation, test = A[:30], A[30:40], A[40:]
+exhaustive = fit_order(C, train, method="exhaustive",
+                       objective="distribution")
+ga = fit_order(C, train, method="ga", objective="distribution",
+               seed=101, budget=24, beam_width=2)
+prediction = predict_order(C, test, ga["order"])
+
+print("Exhaustive:", exhaustive["order"], exhaustive["train_score"])
+print("GA:        ", ga["order"], ga["train_score"])
+print("GA evaluations / proposals:", ga["evaluations"], ga["proposals"])
+assert exhaustive["train_score"] <= ga["train_score"] + 1e-10
+\`\`\`
+
+The search uses *only the training assays*. The held-out mineral RMSE, which is printed by the [complete Python tutorial](tutorial/explore_emc.py), is evaluated afterwards against simulated truth. An exhaustive order score is the best chemical training score in a set of 24 **greedy sequences**, not an oracle for mineral truth or for the continuous constrained solution.
 
 ## 4. Synthetic experimental design {#emc-design}
 
@@ -192,6 +350,20 @@ There were six scenarios with three independently generated replicate cohorts pe
 Part 2A evaluated five mass-balance estimators, producing 5,400 baseline specimen fits. Part 2B evaluated 20 configurations of allocation-search method, training objective and search seed per replicate cohort, giving 360 fitted configurations and 1,080 split-level metric rows. The numerical comparisons reused the same frozen synthetic cohorts and train/validation/test assignments. The order-selection methods saw training assays and the assumed response matrix; generating mineral truth was reserved for retrospective evaluation.
 
 Mineral and assay RMSE were calculated on the held-out specimens. The prespecified exploratory benefit criterion required a mineral-RMSE reduction of at least 0.01 whole-sample mass fraction in two of three matched replicates relative to the designated constrained baseline, with mean assay-RMSE increase no greater than 0.001. This is a descriptive decision rule for the simulation, not a hypothesis test or a universal definition of a meaningful field improvement. Three replicate cohorts cannot provide a general precision or power assessment.
+
+### Reproduce the full teaching example
+
+Download the six files from the [tutorial folder](tutorial/README.md), or clone the [GitHub writing repository](https://github.com/ClausonGeomet/writing) and open \`posts/emc-part2-what-assays-can-tell-us/tutorial/\`. After installing pinned [\`simCoDaR\`](https://github.com/ClausonGeomet/simCoDaR) in R and the Python dependencies from [\`requirements.txt\`](tutorial/requirements.txt), run:
+
+\`\`\`bash
+Rscript generate_data.R .
+python -m pip install -r requirements.txt
+python explore_emc.py .
+\`\`\`
+
+The scripts print forward mass-balance and moment checks, both greedy allocations, held-out errors for the baseline and two order-search methods, the distribution score components and the chemical null-space counterexample. The source files are [\`generate_data.R\`](tutorial/generate_data.R), [\`explore_emc.py\`](tutorial/explore_emc.py), [\`baselines.py\`](tutorial/baselines.py) and [\`emc_prototypes.py\`](tutorial/emc_prototypes.py). The first two are a compact tutorial; the last two are byte-for-byte copies of the original research functions.
+
+This is intentionally **not** the complete six-scenario benchmark or a new validated study. For the frozen 1,080-specimen design and its saved comparisons, see the [Part 2A](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a) and [Part 2B](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2b) source and output manifests. The teaching example is a way to inspect the mechanism, not to replace the full audit.
 
 ## 5. Results and interpretation {#emc-results}
 
@@ -250,6 +422,28 @@ The synthetic experiment included 180 paired specimen-level mineral swaps that y
 The same issue can be expressed in moment terms. Shifting a feasible mean mineral vector by $t\mathbf v$ leaves $C\boldsymbol\mu_m$ unchanged; a feasible change to mineral covariance along $\mathbf v\mathbf v^\mathsf T$ leaves $C\Sigma_m C^\mathsf T$ unchanged because $C\mathbf v=0$. Thus even exact knowledge of the observed first two moments need not identify their mineral counterparts.
 
 This is the crucial statistical limit on the proposed method-of-moments and distribution-matching direction. A larger assay dataset can estimate observable moments more precisely, but cannot recover an unmeasured mineral contrast that lies in the null space of $C$. The next useful question is not simply which discrepancy measure to optimise. It is which additional information, constraint or measurement can justify a choice among the chemically equivalent solutions.
+
+### Verify an exactly unobservable mineral contrast (Python)
+
+The three-mineral counterexample is short enough to run directly. Two different mineral populations, produced by interchanging anatase and rutile, give the same assay rows:
+
+\`\`\`python
+C_qar = np.array([[1., 0., 0.], [0., 1., 1.]])
+M_qar = np.array([
+    [.60, .25, .15], [.50, .10, .40],
+    [.70, .15, .15], [.40, .35, .25]
+])
+A_original = M_qar @ C_qar.T
+A_swapped = M_qar[:, [0, 2, 1]] @ C_qar.T
+np.testing.assert_allclose(A_original, A_swapped, atol=1e-12)
+
+same_assays = score_assays(
+    A_original, A_swapped, objective="distribution"
+)
+print("Assay distribution JS:", same_assays["js"])  # exactly zero
+\`\`\`
+
+The second mineral population is different, but **all observable assay rows** are identical. Consequently their empirical means, covariances and marginal histograms—and every assay-only JS or KL comparison under a common measure—are identical. Additional optimisation cannot infer which polymorph was present without new information.
 
 ## 7. Follow-up experiments: independent mineralogical information {#emc-followup}
 
