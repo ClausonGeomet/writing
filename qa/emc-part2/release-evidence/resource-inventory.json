@@ -1,0 +1,434 @@
+{
+  "summary": {
+    "file_count": 34,
+    "html_count": 6,
+    "local_refs": 796,
+    "missing": [],
+    "bad_fragments": [],
+    "external_refs": 89,
+    "http_all_ok": true,
+    "candidate_files": [
+      "posts/emc-part2-what-assays-can-tell-us/figures/ambiguous_swap.png",
+      "posts/emc-part2-what-assays-can-tell-us/figures/direct_vs_transfer.png",
+      "posts/emc-part2-what-assays-can-tell-us/index.html",
+      "posts/emc-part2-what-assays-can-tell-us/publication.css",
+      "posts/emc-part2-what-assays-can-tell-us/supplements/evidence-notes.html",
+      "posts/emc-part2-what-assays-can-tell-us/supplements/measurement-proposal.html"
+    ],
+    "forbidden_output_paths": [],
+    "source_permalink_checks": [
+      {
+        "commit": "d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79",
+        "path": "research/emc-part2a/RESEARCH_FINDINGS.md",
+        "valid_local_git_object": true
+      },
+      {
+        "commit": "d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79",
+        "path": "research/emc-part2a/MATHEMATICAL_DESIGN.md",
+        "valid_local_git_object": true
+      },
+      {
+        "commit": "d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79",
+        "path": "research/emc-part2a/CONTRACT_DEVIATIONS.md",
+        "valid_local_git_object": true
+      },
+      {
+        "commit": "d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79",
+        "path": "research/emc-part2b/ALL_SEED_ANALYSIS.md",
+        "valid_local_git_object": true
+      },
+      {
+        "commit": "e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b",
+        "path": "research/emc-part2b/prior_guided/MATHEMATICAL_DESIGN.md",
+        "valid_local_git_object": true
+      },
+      {
+        "commit": "e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b",
+        "path": "research/emc-part2b/prior_guided/FINITE_CALIBRATION_RESULTS.md",
+        "valid_local_git_object": true
+      },
+      {
+        "commit": "2f172838f8ae3259cbace688551b158447398796",
+        "path": "research/emc-part2b/phase_sensitive/RESULTS.md",
+        "valid_local_git_object": true
+      },
+      {
+        "commit": "2f172838f8ae3259cbace688551b158447398796",
+        "path": "research/emc-part2b/phase_sensitive/RESULTS.md",
+        "valid_local_git_object": true
+      },
+      {
+        "commit": "2f172838f8ae3259cbace688551b158447398796",
+        "path": "research/emc-part2b/phase_sensitive/RESULTS.md",
+        "valid_local_git_object": true
+      }
+    ],
+    "local_research_relative_links": [],
+    "guard": {
+      "guard_files": 29,
+      "candidate_files": [
+        "posts/emc-part2-what-assays-can-tell-us/index.html"
+      ],
+      "guard_stub_bytes": 90,
+      "guard_index_counts": {
+        "index.html": 0,
+        "index.xml": 0,
+        "search.json": 0,
+        "sitemap.xml": 0,
+        "listings.json": 0
+      },
+      "release_index_counts": {
+        "index.html": 3,
+        "index.xml": 4,
+        "search.json": 16,
+        "sitemap.xml": 1,
+        "listings.json": 1
+      },
+      "guard_no_supplements": true,
+      "no_global_resources_glob": true
+    },
+    "http_port": 39343
+  },
+  "files": [
+    {
+      "path": "assets/logo-mark-final.png",
+      "bytes": 7134,
+      "sha256": "b21c0d164f8c8cbedfc8145bcec8eeb3f2306c5e557a5f93a548f5e9567cef3f",
+      "status": 200,
+      "mime": "image/png",
+      "expected_mime": "image/png",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "index.html",
+      "bytes": 30005,
+      "sha256": "8a932c793c2f245f92a97ac321297b006635b62c327c87660c851822d88304a1",
+      "status": 200,
+      "mime": "text/html",
+      "expected_mime": "text/html",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "index.xml",
+      "bytes": 134047,
+      "sha256": "75bdaf0b576fb23ddbaf577c6a084970e37c9b2db6183230b6a6b02643013ef5",
+      "status": 200,
+      "mime": "application/xml",
+      "expected_mime": "application/xml",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "listings.json",
+      "bytes": 179,
+      "sha256": "d56cb3c707aa210f08640b291df1fed4a8cf8d52b9aa48864b23bb1c7efbf30d",
+      "status": 200,
+      "mime": "application/json",
+      "expected_mime": "application/json",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "posts/element-to-mineral-conversion/index.html",
+      "bytes": 1524392,
+      "sha256": "9ae67b81a3ffab62efbe54dda19d99950afb18edc225737dd1d50d28b388401e",
+      "status": 200,
+      "mime": "text/html",
+      "expected_mime": "text/html",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "posts/element-to-mineral-conversion/rendered-report.html",
+      "bytes": 2655141,
+      "sha256": "9bd4746e25be32c1a0c5312ff2b71ff6634ee4a6d47272d839e2378d0b99f973",
+      "status": 200,
+      "mime": "text/html",
+      "expected_mime": "text/html",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "posts/emc-part2-what-assays-can-tell-us/figures/ambiguous_swap.png",
+      "bytes": 65562,
+      "sha256": "5b03a7dc617262688d52654738a075107f2dd16a4c2cc8e6ec435f81369bfb85",
+      "status": 200,
+      "mime": "image/png",
+      "expected_mime": "image/png",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "posts/emc-part2-what-assays-can-tell-us/figures/direct_vs_transfer.png",
+      "bytes": 63877,
+      "sha256": "4226978901035ef33594a1b926d19ebeee6860e7a271cd2ec9ac611e1c4b19f5",
+      "status": 200,
+      "mime": "image/png",
+      "expected_mime": "image/png",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "posts/emc-part2-what-assays-can-tell-us/index.html",
+      "bytes": 54822,
+      "sha256": "be27202fbb5fd4a6b22cb4b3bc4b93b5c58815560ada9f47cedf5a013a8b79fe",
+      "status": 200,
+      "mime": "text/html",
+      "expected_mime": "text/html",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "posts/emc-part2-what-assays-can-tell-us/publication.css",
+      "bytes": 1262,
+      "sha256": "c707a59bc8541d62383bd2dfe0e61c82c6d2fbc7b998182dded9ce221b22f433",
+      "status": 200,
+      "mime": "text/css",
+      "expected_mime": "text/css",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "posts/emc-part2-what-assays-can-tell-us/supplements/evidence-notes.html",
+      "bytes": 4174,
+      "sha256": "12cb581dc6414c51455d02292a9d2003587e2f8614a9fd6ca969f81d3808d79f",
+      "status": 200,
+      "mime": "text/html",
+      "expected_mime": "text/html",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "posts/emc-part2-what-assays-can-tell-us/supplements/measurement-proposal.html",
+      "bytes": 2648,
+      "sha256": "2421668b941e86736bf6d482e69b279a0970ab025327613a9446b51fb0150fd7",
+      "status": 200,
+      "mime": "text/html",
+      "expected_mime": "text/html",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "robots.txt",
+      "bytes": 55,
+      "sha256": "8bf4c05f47609d45a5c3ea44964e779017287eba295ff1b5dd40aa35dd2d6589",
+      "status": 200,
+      "mime": "text/plain",
+      "expected_mime": "text/plain",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "search.json",
+      "bytes": 60515,
+      "sha256": "45f81255a713bab58b198c9f3be06b67647cd3fd5a73de219ba0cfae7d54790d",
+      "status": 200,
+      "mime": "application/json",
+      "expected_mime": "application/json",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/bootstrap/bootstrap-bd6afe4f48d98c99417a942282f71e62.min.css",
+      "bytes": 477414,
+      "sha256": "0f2ddd50e315890b5590d6b99f87d25bd13fc7e07040c814ee7e71b4dd1526fa",
+      "status": 200,
+      "mime": "text/css",
+      "expected_mime": "text/css",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/bootstrap/bootstrap-icons.css",
+      "bytes": 99464,
+      "sha256": "01253947f506e030589e4f33fc7ec7ccdfb9505e2e596dedf16445f12e243c0a",
+      "status": 200,
+      "mime": "text/css",
+      "expected_mime": "text/css",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/bootstrap/bootstrap-icons.woff",
+      "bytes": 180288,
+      "sha256": "f55513b7b591cb84a3b87ff0e34ea24d4831d6fedc22e54b911ca64b5b544a15",
+      "status": 200,
+      "mime": "font/woff",
+      "expected_mime": "font/woff",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/bootstrap/bootstrap.min.js",
+      "bytes": 80668,
+      "sha256": "d2ea6c1e0cabca20d18e924b25a1cd0187c38ba7c33f60ab06e1b0402b9bcdb5",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/clipboard/clipboard.min.js",
+      "bytes": 9160,
+      "sha256": "e17a1d816e13c0826e0ed7febfabc3277f45571234bde0bf9120829a7169edc9",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-html/anchor.min.js",
+      "bytes": 5888,
+      "sha256": "69098e105d990f834cff1b7886d873444228ff63c590e5ff834d568f1115ed8b",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-html/popper.min.js",
+      "bytes": 20084,
+      "sha256": "4d50586b184724d39ddfe0f6582861664eddd5e806e5a79e0dbaa832361414d0",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-html/quarto-syntax-highlighting-9f43a20c679eb76b4703ca291990b4b0.css",
+      "bytes": 3650,
+      "sha256": "af8237c8adab2c63c207dce2fe804b97199a162cb2ee22fd49264191f5428820",
+      "status": 200,
+      "mime": "text/css",
+      "expected_mime": "text/css",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-html/quarto.js",
+      "bytes": 26830,
+      "sha256": "4ecb60f215d96b2af0fe9d985c71e32863b1c993a64725a416ac18b5991c59c6",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-html/tabsets/tabsets.js",
+      "bytes": 2882,
+      "sha256": "a9c226bf70e82eaf5476f619cecfb70b4446b87ce4d1634d6404b0b2ba006d15",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-html/tippy.css",
+      "bytes": 1409,
+      "sha256": "5969f497d9158d7682f8219c6f13fa67269cdf5bf50a3931d95327151dee5678",
+      "status": 200,
+      "mime": "text/css",
+      "expected_mime": "text/css",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-html/tippy.umd.min.js",
+      "bytes": 24033,
+      "sha256": "41181eeec6d7ba64cb9165f0e95563e34e026bde79e7c13aeec83270429b6fae",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-listing/list.min.js",
+      "bytes": 19446,
+      "sha256": "1efd7641f4c65889093d8410037e78791c9ce951b2d71457777caaa40b816b77",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-listing/quarto-listing.js",
+      "bytes": 7111,
+      "sha256": "48c09833376066bdeafd898d8e56b5992c6b756e4d44acaada2cc0e73bcbcfe2",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-nav/headroom.min.js",
+      "bytes": 4570,
+      "sha256": "5b80cc4165a661a3f2060d6bdb5ccff591f04c4f8e39a06c12d3c2544587cb17",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-nav/quarto-nav.js",
+      "bytes": 9851,
+      "sha256": "a209dafb198d7c8e77cb398912b7225806e7b998211afa1fb269a4ef54ff56f6",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-search/autocomplete.umd.js",
+      "bytes": 96397,
+      "sha256": "cd9db3b7d812139a4679a2566ea8f01b2a80159490a60b9e9e813e81b5e00a05",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-search/fuse.min.js",
+      "bytes": 23539,
+      "sha256": "c57339c3fa16b1d69d9a6b46749a8139ef8d4fc9bbfe48144ff897aa7d4222ec",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "site_libs/quarto-search/quarto-search.js",
+      "bytes": 43121,
+      "sha256": "1a23221f499b3993dc66ca5c8913e4e6602dfa4652337e9fbf75139ded5ece68",
+      "status": 200,
+      "mime": "text/javascript",
+      "expected_mime": "text/javascript",
+      "matches_disk": true,
+      "mime_ok": true
+    },
+    {
+      "path": "sitemap.xml",
+      "bytes": 561,
+      "sha256": "7be3495c25ab0ac2a299e122bec4312df467560be90b9e498465a76dafed67d3",
+      "status": 200,
+      "mime": "application/xml",
+      "expected_mime": "application/xml",
+      "matches_disk": true,
+      "mime_ok": true
+    }
+  ]
+}

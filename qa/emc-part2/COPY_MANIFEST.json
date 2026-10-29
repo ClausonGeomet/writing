@@ -1,0 +1,128 @@
+{
+  "core_commit": "c1baad3b3cce1539643b10882421cb7e4348e8ef",
+  "source_run": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr",
+  "files": [
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/audit.md",
+      "destination": "qa/emc-part2/BUILD_AUDIT.md",
+      "bytes": 6760,
+      "sha256": "afae69e294615dfdc00cb734cab2e945dee0708acd3e00c10e517b9ca6f68d32",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/article-1440.png",
+      "destination": "qa/emc-part2/release-evidence/article-1440.png",
+      "bytes": 1990696,
+      "sha256": "9d77f8f87d8f15acc44718b2ea6be78528c2094fa023341a8019417161075d24",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/article-320.png",
+      "destination": "qa/emc-part2/release-evidence/article-320.png",
+      "bytes": 1735546,
+      "sha256": "3c264f4fea73a5d21564ed3bd35596ea95e3e107064ad20a7aa4bb2dfaa104a5",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/article-390.png",
+      "destination": "qa/emc-part2/release-evidence/article-390.png",
+      "bytes": 1927986,
+      "sha256": "c9ce537e1227662c89f65120199a2ec0e23207f99606484294551a10934c041a",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/article-768.png",
+      "destination": "qa/emc-part2/release-evidence/article-768.png",
+      "bytes": 2059921,
+      "sha256": "acf9ae562002536534beb02125827064cd4b1aea5a2b551fff3d81a6f94468b0",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/browser-results.json",
+      "destination": "qa/emc-part2/release-evidence/browser-results.json",
+      "bytes": 2661,
+      "sha256": "ab278d6fa22b9929ae72ff3694442162cf70fdab9380882622df9d90002eef4d",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/browser.log",
+      "destination": "qa/emc-part2/release-evidence/browser.log",
+      "bytes": 2661,
+      "sha256": "ab278d6fa22b9929ae72ff3694442162cf70fdab9380882622df9d90002eef4d",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/browser_check.py",
+      "destination": "qa/emc-part2/release-evidence/browser_check.py",
+      "bytes": 3929,
+      "sha256": "e91eef6169098b6554d668ec4886a38f120a5c05fd1acb41bb518e0c45811e08",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/build-retry.log",
+      "destination": "qa/emc-part2/release-evidence/build-retry.log",
+      "bytes": 6144,
+      "sha256": "b09d8182e7dcd571be8e8f813c89f1a8489340f2e3ae5457ebd96809c565293f",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/build.log",
+      "destination": "qa/emc-part2/release-evidence/build.log",
+      "bytes": 3473,
+      "sha256": "be9f4c4ca62579f83c8cfb45307cbfe50d53eefecc3627b954fda961aa1c54e1",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/guard-build.log",
+      "destination": "qa/emc-part2/release-evidence/guard-build.log",
+      "bytes": 6144,
+      "sha256": "b09d8182e7dcd571be8e8f813c89f1a8489340f2e3ae5457ebd96809c565293f",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/manifest.json",
+      "destination": "qa/emc-part2/release-evidence/manifest.json",
+      "bytes": 2320,
+      "sha256": "1e62aa9a99cd3374ad3aead53c6bc1b6087802d2d8f13cd6b859564b33a73b5e",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/math-320.png",
+      "destination": "qa/emc-part2/release-evidence/math-320.png",
+      "bytes": 70911,
+      "sha256": "19313839e9188eee966f13e6aa972061acc89539d06365817dd381a590b01076",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/resource-check.log",
+      "destination": "qa/emc-part2/release-evidence/resource-check.log",
+      "bytes": 2852,
+      "sha256": "190f6b7452a5c0f88c09945c4cc26bf8155f34143f19a7fde86da8e46d82f9a6",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/resource-inventory.json",
+      "destination": "qa/emc-part2/release-evidence/resource-inventory.json",
+      "bytes": 13841,
+      "sha256": "8bff3edc2d75e52e1c10e99dca5ba8a2de78b006b50790e6b3ba589d24db388c",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/source-hashes.json",
+      "destination": "qa/emc-part2/release-evidence/source-hashes.json",
+      "bytes": 2268,
+      "sha256": "d8a3a82ff46b9835b868420d0dacb17a885417a42e5d87cb58846ae051a4a65f",
+      "byte_verified": true
+    },
+    {
+      "source": "/tmp/emc-part2-workspace/writing/runs/REQ-20261029-emc-release-pr/release-evidence/verify_release.py",
+      "destination": "qa/emc-part2/release-evidence/verify_release.py",
+      "bytes": 4982,
+      "sha256": "04fd4c1b8dfe56f7e85d27aeb4607e201a066e24f6f0499f3668e76319429080",
+      "byte_verified": true
+    }
+  ],
+  "total_bytes": 7843095,
+  "all_byte_verified": true,
+  "original_manifest": "release-evidence/manifest.json"
+}

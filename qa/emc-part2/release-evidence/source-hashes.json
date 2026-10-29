@@ -1,0 +1,51 @@
+[
+  {
+    "path": "assets/logo-mark-final.png",
+    "source_sha256": "b21c0d164f8c8cbedfc8145bcec8eeb3f2306c5e557a5f93a548f5e9567cef3f",
+    "candidate_sha256": "b21c0d164f8c8cbedfc8145bcec8eeb3f2306c5e557a5f93a548f5e9567cef3f",
+    "equal_except_approved_flag": true,
+    "bytes": 7134
+  },
+  {
+    "path": "posts/emc-part2-what-assays-can-tell-us/figures/ambiguous_swap.png",
+    "source_sha256": "5b03a7dc617262688d52654738a075107f2dd16a4c2cc8e6ec435f81369bfb85",
+    "candidate_sha256": "5b03a7dc617262688d52654738a075107f2dd16a4c2cc8e6ec435f81369bfb85",
+    "equal_except_approved_flag": true,
+    "bytes": 65562
+  },
+  {
+    "path": "posts/emc-part2-what-assays-can-tell-us/figures/direct_vs_transfer.png",
+    "source_sha256": "4226978901035ef33594a1b926d19ebeee6860e7a271cd2ec9ac611e1c4b19f5",
+    "candidate_sha256": "4226978901035ef33594a1b926d19ebeee6860e7a271cd2ec9ac611e1c4b19f5",
+    "equal_except_approved_flag": true,
+    "bytes": 63877
+  },
+  {
+    "path": "posts/emc-part2-what-assays-can-tell-us/index.qmd",
+    "source_sha256": "fbdbb02076f71bf90745bd6477a79d1d5c11997a75b25ccfa142ddb58176ee57",
+    "candidate_sha256": "09867a08dda5b997c6d2c71ba04bd32f210af7bafd088557be20637f477816f6",
+    "equal_except_approved_flag": true,
+    "bytes": 23226
+  },
+  {
+    "path": "posts/emc-part2-what-assays-can-tell-us/publication.css",
+    "source_sha256": "c707a59bc8541d62383bd2dfe0e61c82c6d2fbc7b998182dded9ce221b22f433",
+    "candidate_sha256": "c707a59bc8541d62383bd2dfe0e61c82c6d2fbc7b998182dded9ce221b22f433",
+    "equal_except_approved_flag": true,
+    "bytes": 1262
+  },
+  {
+    "path": "posts/emc-part2-what-assays-can-tell-us/supplements/evidence-notes.html",
+    "source_sha256": "12cb581dc6414c51455d02292a9d2003587e2f8614a9fd6ca969f81d3808d79f",
+    "candidate_sha256": "12cb581dc6414c51455d02292a9d2003587e2f8614a9fd6ca969f81d3808d79f",
+    "equal_except_approved_flag": true,
+    "bytes": 4174
+  },
+  {
+    "path": "posts/emc-part2-what-assays-can-tell-us/supplements/measurement-proposal.html",
+    "source_sha256": "2421668b941e86736bf6d482e69b279a0970ab025327613a9446b51fb0150fd7",
+    "candidate_sha256": "2421668b941e86736bf6d482e69b279a0970ab025327613a9446b51fb0150fd7",
+    "equal_except_approved_flag": true,
+    "bytes": 2648
+  }
+]
