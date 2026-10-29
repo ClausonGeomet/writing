@@ -1,13 +1,15 @@
 ---
-title: "Element-to-mineral conversion, Part 2: what the assays can tell us"
-subtitle: "Chemical ambiguity, independent calibration and phase-sensitive evidence"
+title: "Element-to-mineral conversion, Part 2: mass balance, allocation order and distributional information"
+subtitle: "An exploratory investigation of mineral inference from chemical assays"
 author: "Matt Clauson"
 date: 2026-10-29
+lang: en-AU
 draft: false
-description: "What bulk assays can and cannot reveal about mineral phases, using bounded exploratory synthetic studies."
+description: "A synthetic investigation of constrained mineral mass balance, sequential allocation, genetic algorithms, moment matching and information-theoretic distribution comparisons."
 format:
   html:
     toc: true
+    toc-depth: 2
     toc-location: right-body
     css: publication.css
 execute:
@@ -17,101 +19,295 @@ execute:
   message: false
 ---
 
-<nav class="article-mobile-outline" aria-label="Article outline">
+<nav class="article-mobile-outline" aria-label="Article sections">
 <details>
 <summary>On this page</summary>
 <ol>
-<li><a href="#a-good-assay-fit-can-conceal-the-wrong-minerals" class="no-external" target="_self">A good assay fit can conceal the wrong minerals</a></li>
-<li><a href="#baselines-and-the-cost-of-assumptions" class="no-external" target="_self">Baselines and the cost of assumptions</a></li>
-<li><a href="#what-order-search-did-and-what-it-could-never-supply" class="no-external" target="_self">What order search did, and what it could never supply</a></li>
-<li><a href="#independent-calibration-helpful-information-fallible-information" class="no-external" target="_self">Independent calibration: helpful information, fallible information</a></li>
-<li><a href="#measuring-a-phase-is-different-from-transferring-its-lesson" class="no-external" target="_self">Measuring a phase is different from transferring its lesson</a></li>
-<li><a href="#what-must-be-measured-next" class="no-external" target="_self">What must be measured next</a></li>
-<li><a href="#evidence-and-review-status" class="no-external" target="_self">Evidence and review status</a></li>
+<li><a class="no-external" target="_self" href="#emc-introduction">Introduction</a></li>
+<li><a class="no-external" target="_self" href="#emc-forward">Chemical balance and estimation</a></li>
+<li><a class="no-external" target="_self" href="#emc-distributions">Moments and distributional information</a></li>
+<li><a class="no-external" target="_self" href="#emc-sequential">Sequential allocation and search</a></li>
+<li><a class="no-external" target="_self" href="#emc-design">Experimental design</a></li>
+<li><a class="no-external" target="_self" href="#emc-results">Results and interpretation</a></li>
+<li><a class="no-external" target="_self" href="#emc-identifiability">Identifiability</a></li>
+<li><a class="no-external" target="_self" href="#emc-followup">Mineralogical information</a></li>
+<li><a class="no-external" target="_self" href="#emc-empirical">Empirical validation</a></li>
+<li><a class="no-external" target="_self" href="#emc-next">Next statistical questions</a></li>
+<li><a class="no-external" target="_self" href="#emc-conclusion">Conclusion</a></li>
+<li><a class="no-external" target="_self" href="#emc-evidence">Research record</a></li>
 </ol>
 </details>
 </nav>
 
-## A good assay fit can conceal the wrong minerals
+## Introduction {#emc-introduction}
 
-Element-to-mineral conversion (EMC) estimates mineral amounts from a bulk chemical assay and assumed mineral compositions. The assay tells us how much of each measured chemical component is present. It does not necessarily tell us which mineral carries that component. A reconstruction can match every measured component while assigning the wrong phases. That distinction matters when a decision depends on mineralogy rather than bulk chemistry.
+Routine geochemical assays are considerably more numerous than direct mineralogical measurements in many geometallurgical datasets. Element-to-mineral conversion (EMC) offers a way of estimating mineral abundances from bulk chemistry and an assumed set of mineral compositions. This is attractive when mineralogy is needed to interpret an orebody, construct domains or investigate processing behaviour, but mineralogical analyses are too sparse to support those tasks directly.
 
-For a specimen, let $\mathbf a$ be the vector of measured analyte mass fractions, $\mathbf m$ the nonnegative mineral mass fractions, and $C$ the assumed chemical response of each mineral. On a common whole-sample mass basis, the working model is
+The inverse calculation is less straightforward than the forward chemical balance. Several mineral assemblages may reproduce the same assay, particularly when phases have similar chemical responses or the mineral inventory is incomplete. Measurement error, variable mineral chemistry and reporting conventions introduce further uncertainty. A numerical solution can therefore be chemically consistent without being a reliable estimate of the phases actually present.
+
+[Part 1](https://clausongeomet.com/writing/posts/element-to-mineral-conversion/) introduced the basic mass balance and the problem of non-unique mineral solutions. The purpose of this second investigation was to examine several related questions. What do constrained least-squares estimators recover under different departures from an ideal mass balance? What happens when minerals are allocated sequentially from a finite chemical inventory, and can a search algorithm explore the resulting order dependence? Can information about the distribution of assays, rather than individual assays alone, help constrain the conversion? Finally, when the bulk chemistry is insufficient, what changes if independent mineralogical observations are introduced?
+
+This was a methodological exploration, not an attempt to demonstrate the superiority of one optimisation algorithm. The initial experiments compare estimators under controlled synthetic conditions, where the generating mineral proportions are known. Separate follow-up experiments examine calibration and phase-sensitive measurements. None constitutes validation on an independently sampled ore deposit.
+
+## 1. From a chemical balance to a mineral estimate {#emc-forward}
+
+For a specimen, let $\mathbf m\in\mathbb R^k$ contain the mineral mass fractions, $\mathbf a\in\mathbb R^p$ the measured analyte mass fractions and $C\in\mathbb R^{p\times k}$ the expected chemical contribution of each mineral to each analyte. The observation model is
 
 $$
-\mathbf a=C\mathbf m+\boldsymbol\epsilon.
+\mathbf a=C\mathbf m+\boldsymbol\epsilon, \tag{1}
 $$
 
-The residual $\boldsymbol\epsilon$ may include analytical error, but a large residual can also signal an omitted mineral, incorrect mineral chemistry or incompatible reporting bases. Conversely, a small residual is no certificate of correct mineralogy. Assays here are signed, unclosed measurements; forcing their components to sum to one would change the measurement model.
+where $\boldsymbol\epsilon$ denotes analytical error and may also absorb discrepancies from an imperfect fixed-composition model. A physically meaningful solution generally requires $m_j\geq0$. A complete phase inventory may justify $\sum_jm_j=1$; an incomplete inventory may instead require $\sum_jm_j\leq1$, or an explicit unmodelled component. Neither constraint makes unmeasured phases observable by itself.
 
-Consider the deliberately simple Quartz–Anatase–Rutile (QAR) example. Quartz supplies the measured SiO2 response, while Anatase and Rutile have the same measured TiO2 response. Moving mass from Rutile to Anatase leaves both assay channels and total mineral mass unchanged. The [Part A counterexample — repository source](https://github.com/ClausonGeomet/writing/blob/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a/RESEARCH_FINDINGS.md) constructs such paired synthetic compositions with exactly identical assays. Its picture shows a structural ambiguity, not a claim that every ore has this ambiguity or that boundaries can never resolve a particular specimen. Even matching the entire assay distribution cannot distinguish two compositions that give the same assay for every specimen.
+The main synthetic system contained quartz, hematite, kaolinite and forsterite. Four oxide channels were retained: SiO$_2$, Fe$_2$O$_3$ reported as total iron, Al$_2$O$_3$ and MgO. The frozen idealised response matrix was approximately:
 
-![Synthetic Quartz–Anatase–Rutile compositions with different Anatase and Rutile fractions can have identical SiO2 and TiO2 assays. The paired differences are an exact model counterexample, not field observations.](figures/ambiguous_swap.png){fig-alt="Pairs of synthetic mineral compositions exchange Anatase and Rutile while their bulk assays stay identical."}
+| Assay component | Quartz | Hematite | Kaolinite | Forsterite |
+|:--|--:|--:|--:|--:|
+| SiO$_2$ | 1.0000 | 0 | 0.4655 | 0.4271 |
+| Fe$_2$O$_3$ (total Fe basis) | 0 | 1.0000 | 0 | 0 |
+| Al$_2$O$_3$ | 0 | 0 | 0.3950 | 0 |
+| MgO | 0 | 0 | 0 | 0.5729 |
 
-The practical question is therefore twofold: how well does an estimator honor the measured chemistry, and how much phase information do those measurements actually contain? The first is a fitting question. The second needs either a justified prior about phase occurrence or a new measurement sensitive to the missing phase contrast. Neither should be smuggled in as if it came from the bulk assay.
+These coefficients are drawn from the [frozen simulation fixture](https://github.com/ClausonGeomet/writing/blob/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a/fixtures/manifest.json). The retained components are not a complete accounting of every oxide, hydroxyl or volatile in the minerals. They were not closed to 100% after selection, and an unallocated mass fraction is not automatically a measure of amorphous material.
 
-## Baselines and the cost of assumptions
+### Constrained least squares
 
-Ordinary nonnegative least squares (NNLS) chooses mineral amounts that minimize squared assay residuals subject to nonnegative amounts. Weighted least squares gives different assay channels different precision weights. Those weights should describe **measurement error under a stated protocol**, including relevant covariance, rather than correlations between rock types in a dataset. These are useful chemical-fit baselines, although neither fit by itself resolves minerals with identical measured responses. [Part A's mathematical design — repository source](https://github.com/ClausonGeomet/writing/blob/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a/MATHEMATICAL_DESIGN.md) records the precise baseline definitions.
+The natural starting point is to find mineral masses that minimise assay residuals while satisfying the appropriate physical constraints. For a known, positive-definite analytical error covariance $\Sigma_\epsilon$, a general weighted objective is
 
-Constrained least squares (CLS) also restricts the sum of mineral fractions. Equality closure, a sum of one, is justified only when the mineral inventory is complete on the stated basis. Partial closure, a sum at most one, leaves the difference as unallocated whole-sample mass. That difference is bookkeeping: it does not identify an omitted mineral or quantify amorphous content by itself. Likewise, a nonzero chemical residual cannot be assigned automatically to an omitted phase. Part A compared unrestricted, NNLS, weighted NNLS and both closure variants under frozen synthetic cases, including missing phases, assay noise and wrong assumed chemistry. These are specimen-level fits, not plant-stream mass reconciliation with uncertain flows.
+$$
+\hat{\mathbf m}=\underset{\mathbf m\in\mathcal F}{\operatorname{argmin}}
+\;(\mathbf a-C\mathbf m)^\mathsf T\Sigma_\epsilon^{-1}(\mathbf a-C\mathbf m), \tag{2}
+$$
 
-The accepted [contract deviations — repository source](https://github.com/ClausonGeomet/writing/blob/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a/CONTRACT_DEVIATIONS.md) also matter to anyone reusing the numerical record: legacy Part A and Part B report opposite residual signs, and Part A's reported weighted objective is a diagnostic at the returned estimate for some unweighted baselines. Its historical legacy check is not a pass against the original residual contract. The article uses error magnitudes and original report definitions, without silently repairing those frozen outputs.
+with $\mathcal F$ denoting the chosen nonnegative and mass-closure feasible set. This expression is a statistical motivation, not a claim that a full field-derived laboratory covariance was estimated in the experiment. The frozen baselines comprised a pseudoinverse, nonnegative least squares (NNLS), diagonally weighted NNLS and constrained least squares with equality or partial closure. The prespecified comparison used equality-constrained least squares, except in the missing-phase scenario, where partial closure was used.
 
-A low observed-assay error can be especially misleading in the QAR example. The fitting procedure may distribute Ti-bearing mass between Anatase and Rutile almost arbitrarily while matching total Ti. If the assay is noisy, fitting it more closely need not improve recovery of the noiseless chemistry either. The accepted reports distinguish error against the **observed noisy assay** from error against the **latent noiseless assay**. Their mineral errors concern known synthetic truth; no comparable truth was established for field samples here.
+Weighted residuals and closure encode different sources of information. Measurement weights describe the credibility of the laboratory observations; closure describes the assumed completeness of the modelled mineral inventory. The coefficients in $C$ describe mineral chemistry. Treating any of those as an arbitrary tuning device can improve numerical fit without improving geological interpretation.
 
-## What order search did, and what it could never supply
+## 2. Statistical information at the specimen and population scales {#emc-distributions}
 
-Part B tested a sequential allocator that visits candidate minerals in an order. At each step, the fixed greedy rule allocates as much of that mineral as the remaining mass and nonnegative assay components permit. Early choices can consume an element needed by a later mineral. Changing order can therefore change the answer. The order is a computational choice, not a reconstruction of geological formation history. The study compared fixed, exhaustive, greedy, beam, random and genetic-algorithm (GA) order search, with either rowwise assay matching or an additional distribution-matching score. A selected order was learned from training assays, then held fixed on test specimens; mineral truth was not used to fit it.
+One reason for considering statistical methods beyond least squares was that a drillhole or geological domain provides more than an isolated assay. Across a population of specimens, the observed chemistry has a mean, a covariance structure and a distribution. It is reasonable to ask what those properties imply about the unobserved mineral composition distribution.
 
-The exploratory pilot comprised six known-truth synthetic cases, with three replicates of 60 specimens each and 30/10/20 train/validation/test splits. The prospective benefit rule required a mineral RMSE reduction of at least 0.01 whole-sample mass fraction in at least two of three matched replicates, with mean assay RMSE increasing by no more than 0.001. [All 120 method/objective/seed groups failed that rule — repository source](https://github.com/ClausonGeomet/writing/blob/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2b/ALL_SEED_ANALYSIS.md). Order search could improve a poor fixed order within the allocator family, yet none met the declared benefit against the constrained Part A comparator. A distribution score could trade better mineral error in a particular infeasible case for an assay error increase beyond the allowance. These are descriptive pilot results, not a significance test or proof that no heuristic can ever help. GA had no global optimum guarantee, and seed-dependent runtime comparisons do not establish one.
+### Method of moments and the forward model
 
-A later [exact reachability result — repository source](https://github.com/ClausonGeomet/writing/blob/e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b/research/emc-part2b/prior_guided/MATHEMATICAL_DESIGN.md) clarifies the role of order. If every mineral receives a **freely chosen specimen-specific fraction** of its current residual-resource cap, with fixed nonnegative chemistry and nonnegative resources, every permutation reaches the same final feasible set: nonnegative mineral amounts that use no more than the available assay components or mass budget. In this setting, changing order cannot improve the best achievable value of a common final-state objective. This is a statement about mathematical reachability, not about the fixed greedy rule, finite GA search, common fractions across specimens, signed noisy assays or order-dependent chemistry. Noisy constrained least squares also need not obey these resource inequalities. The proof limits one proposed advantage of order; it does not make the chemical inverse unique.
+Let $\boldsymbol\mu_m=\operatorname E[\mathbf m]$ and $\Sigma_m=\operatorname{Cov}(\mathbf m)$. If $C$ is fixed, analytical errors have zero mean and those errors are independent of the mineral abundances, equation (1) gives
 
-## Independent calibration: helpful information, fallible information
+$$
+\operatorname E[\mathbf a]=C\boldsymbol\mu_m,
+\qquad
+\Sigma_a=C\Sigma_m C^\mathsf T+\Sigma_\epsilon. \tag{3}
+$$
 
-An independent mineralogical calibration set can tell us which phase splits are common in a defined population. In the finite-calibration QAR study, A0 uses assay loss alone and splits an exact Ti tie by minimum Euclidean norm. A1 uses only a calibrated center, projected onto the allowed mineral fractions; it does **not** use the target assay and is not a posterior predictive mean. A2 combines target assay loss with a finite quadratic penalty toward that learned center. The penalty also uses estimated variation within the calibration population and an approximation to uncertainty in its mean. Its covariance floor and shrinkage are prescribed choices; uncertainty in the covariance estimate itself is not integrated. The calibration and evaluation cohorts are independent synthetic draws, and their known laboratory covariance is part of the design, not an empirical result.
+These are the first two population-moment equations. In an ideal setting, observed assay means and covariances could be compared with the corresponding moments implied by a candidate distribution of mineral compositions. This is the method-of-moments idea behind the statistical part of the investigation: rather than treating each assay independently, assess whether a mineral model also reproduces important population-level characteristics.
 
-For each cohort, mass RMSE is the square root of mean squared phase-mass error across its evaluation specimens and the three phases; reported values average those cohort RMSEs. Paired SEs use the 50 independent cohort differences, not pooled specimens. Multiplying a whole-sample fraction by 100 gives percentage points.
+There are immediate qualifications. Equation (3) is conditional on fixed $C$ and independence of mineral variation and measurement error. If mineral chemistry varies systematically or laboratory errors are correlated with specimen characteristics, additional terms appear. More fundamentally, the equations are usually underdetermined. They map the mineral mean and covariance into chemical moments; they do not generally provide an inverse map back to a unique mineral mean or covariance. Under an accurately known, full-column-rank response and known error covariance, inversion of these moments may be possible in principle. In a rank-deficient mineral system it is not. Mineral closure also constrains the covariance, since $\mathbf1^\mathsf T\Sigma_m=0$ for a fully closed composition.
 
-The [finite-calibration results — repository source](https://github.com/ClausonGeomet/writing/blob/e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b/research/emc-part2b/prior_guided/FINITE_CALIBRATION_RESULTS.md) cover ten cells with 50 independent cohorts per cell and 40 evaluation specimens per cohort. Primary cells use calibration sizes 10, 30 and 100; stress cells use 30. In fixed-Quartz cells, A1 and A2 coincide to numerical precision: the target assay has no information about the Anatase/Rutile split, so it cannot update that part of the center. In variable-Quartz cells, A2 can use the assay to correct observed Quartz and total Ti while still relying on calibration for the split. For example, in the matched variable-Quartz cell with 30 calibration specimens, mean cohort mass RMSE was 0.09227 for A0, 0.08454 for center-only A1 and 0.03246 for A2. These errors are whole-sample mass fractions, averaged over cohort RMSEs; the figure 0.03246 is not an error in percentage *relative* to true abundance.
+The distinction between singular-value decomposition (SVD) of $C$ and principal-component analysis (PCA) of the observed assays is relevant here. SVD examines the directions in mineral composition that the assumed chemical system can observe. PCA characterises the dominant directions of variation in the measured assays. Large variation along an assay principal component does not imply that all corresponding mineral phases have been identified. An unobserved mineral contrast can remain invisible even with a large sample and accurately estimated assay covariance.
 
-The advantage depends on calibration resembling the evaluation population. In the deliberately mismatched cell, A2 mass RMSE was 0.17443 versus A0's 0.09208; the paired A2 minus A0 difference was **+0.08235** with descriptive cohort SE 0.00099. A tight but wrong phase preference can therefore harm mineral inference while the bulk assay still fits. One weak-prior and one high-noise calibration stress cell did not reverse the A2 advantage in that frozen grid, but they do not establish a general robustness trend. A wrong occurrence assumption can exclude the true phase altogether. The earlier three-replicate order-search pilot and this 50-cohort calibration study answer different questions and should not be pooled.
+The completed experiments did not fit a standalone method-of-moments estimator for the latent distribution of mineralogy. Instead, they used the moment relationships as motivation for penalties on differences between the observed and reconstructed *assay* means and covariances. This difference in scope matters: matching observable chemical moments is not the same as identifying latent mineral-distribution parameters.
 
-## Measuring a phase is different from transferring its lesson
+### KL divergence and the distributional criterion
 
-A phase-sensitive observation acts directly on the missing QAR contrast. A repeated Ti-total assay may sharpen total Ti precision, but its response to an Anatase-for-Rutile swap remains zero. An Anatase-sensitive channel responds to the swap. Under the stated closed model, the bulk and redundant-Ti designs constrain one independent composition direction; the phase design constrains two. Rank describes which directions can be seen under the model. It does not establish useful real-world precision, phase accuracy or coverage.
+A second line of investigation concerned distributional agreement. Let $p_b$ and $q_b$ denote probabilities assigned to histogram bin $b$ under observed and reconstructed assays. Kullback–Leibler (KL) divergence is
 
-The [phase-sensitive study — repository source](https://github.com/ClausonGeomet/writing/blob/2f172838f8ae3259cbace688551b158447398796/research/emc-part2b/phase_sensitive/RESULTS.md) separates two outcomes. A **direct** specimen receives the phase measurement itself. An **independent unmeasured** evaluation specimen receives only bulk assay; purchasing phase tests on other specimens may improve its learned population prior, but the target's invisible contrast remains unmeasured. Each of four synthetic cells has 50 independent cohorts. Within each cohort, 20 units calibrate, 20 enter the direct comparison, 10 form a purchase pool, and 30 are separate evaluation units. Budgets of zero, two and five pool tests were examined. The two analyses of cell 4, soft and hard occurrence assumptions, reuse the same observations; they are not a fifth independent cell. The simulated phase-reading SD of 0.02 mass fraction and known Gaussian covariance are declared assumptions, not measured laboratory performance.
+$$
+D_{\mathrm{KL}}(p\Vert q)=\sum_b p_b\log\!\left(\frac{p_b}{q_b}\right). \tag{4}
+$$
 
-For direct cell 1, the assay-only A0 mean mass RMSE was 0.090938 with bulk chemistry, 0.090934 after a redundant Ti reading, and 0.016829 with the phase-sensitive reading. These are mean cohort RMSEs for targets that were actually measured. The contrast is large because the new observation sees the previously missing direction on those specimens. It cannot be reported as a benefit for unmeasured specimens.
+It measures a directed discrepancy between probability distributions; it is not symmetric, and its value can diverge when a bin has positive observed probability but zero model probability. The implemented Part 2B distribution criterion used the related Jensen–Shannon (JS) divergence, with $h=(p+q)/2$:
 
-The distinction is easiest to keep in view by asking which specimen received the extra observation:
+$$
+D_{\mathrm{JS}}(p,q)=\tfrac12D_{\mathrm{KL}}(p\Vert h)
++\tfrac12D_{\mathrm{KL}}(q\Vert h). \tag{5}
+$$
 
-| Decision target | New information | Illustrative synthetic result | What it cannot establish |
-| --- | --- | --- | --- |
-| Directly measured unit | Its own phase-sensitive reading | Cell 1 A0 mass RMSE 0.016829 with phase reading, versus 0.090938 bulk only | Benefit on an unmeasured unit |
-| Independent unmeasured unit | Phase readings on other pool units update a population prior | Accurate-prior five-purchase A2 $P-R$ difference −0.000292 (SE 0.000098) | Direct identification of that unit’s phase split |
-| Prior-mismatched unmeasured unit | Same transfer route under a wrong starting preference | A2 with phase purchases 0.144813 versus prior-free A0 0.092592 | That additional data erased prior harm |
+This is a symmetric, finite quantity for the discrete histograms used here. It was evaluated separately for each assay channel using a fixed ten-bin scheme, then averaged over channels. It was not a KL divergence between observed and predicted *mineral* distributions, nor a comparison of full multivariate joint assay densities. The histograms used ten bins with fixed edges at $0,1/8,\ldots,1$ and open-ended outer bins. The bin choices, and use of natural logarithms in the divergence, are part of the scoring definition rather than geological evidence.
 
-![Frozen synthetic results compare a phase reading on the target with phase purchases on separate pool specimens. The direct and independent unmeasured effects have different targets and must be read separately.](figures/direct_vs_transfer.png){fig-alt="Direct target measurement gives a larger mineral-error reduction than population-prior transfer to independent targets with only bulk assays."}
+The combined training objectives were designed to answer a particular exploratory question: does an allocation order that preserves population-level chemical behaviour behave differently from one selected using only per-specimen assay residuals? The rowwise component $L_{\mathrm{row}}$ was an average squared standardised chemical residual, $L_{\mathrm{row}}=\operatorname{mean}_{s,i}\{[(a_{si}-\hat a_{si})/\sigma_i]^2\}$ (with $\sigma_i=1$ where no error scale was supplied). The expanded criterion was
 
-For independent unmeasured targets, the primary comparison at five purchases is A2 with phase purchases ($P$) minus A2 with matched replicate-bulk purchases ($R$). Negative differences favor phase purchases. Selected mean paired differences across 50 cohorts were −0.000292 (descriptive SE 0.000098) for the accurate-prior cell, −0.000477 (0.000158) for the weak-prior cell, and −0.031298 (0.000817) for the mismatched-prior cell. The source [full table — repository source](https://github.com/ClausonGeomet/writing/blob/2f172838f8ae3259cbace688551b158447398796/research/emc-part2b/phase_sensitive/RESULTS.md#primary-independent-unmeasured-transfer-result) also reports both wrong-occurrence analyses and all arm means. These are RMSE differences in whole-sample mass fraction, not percentage improvements, confidence intervals or tests of significance. Purchased units used whole-unit leave-one-out prediction; the independent evaluation units had no phase reading.
+$$
+L_{\mathrm{dist}}=L_{\mathrm{row}}+L_{\mu}+L_{\Sigma}+L_{\mathrm{JS}}, \tag{6}
+$$
 
-The mismatched cell exposes the danger of reporting only the $P$ versus $R$ contrast. Phase purchases improve A2 relative to replicate bulk, but A2 with phase purchases still has mean RMSE **0.144813**, compared with **0.092592** for the prior-free A0 on the same purchased-phase arm. The paired excess is +0.052221 (descriptive SE 0.001208). The extra information partly corrects the wrong prior without erasing its harm. In cell 4, a soft wrong-occurrence preference can be challenged by phase evidence: the unmeasured $P-R$ difference was −0.010900 (0.000387). A hard assumption that Anatase is absent removes it from the feasible set; the corresponding difference was only −0.000020 (0.000001), not recovery of a forbidden mineral. Soft and hard compare assumptions on paired observations, rather than algorithms with the same feasible set.
+where $L_\mu$ compared assay means, $L_\Sigma$ compared assay covariance matrices, and $L_{\mathrm{JS}}$ averaged marginal histogram divergences. For example, with $t_i=\max\{\operatorname{sd}(a_i),0.01\}$ calculated on training data, the moment terms had the form
 
-The study also calculated prior-free, measurement-consistent abundance envelopes from marginal three-standard-deviation boxes. They are **not** confidence or credible intervals, and an empty box is retained as an incompatibility, not silently discarded. Numerical rank, envelope width and a small assay residual each describe different properties. None demonstrates calibrated predictive uncertainty in field material.
+$$
+L_\mu=\frac1p\sum_i\left(\frac{\bar a_i-\overline{\hat a}_i}{t_i}\right)^2,
+\quad
+L_\Sigma=\frac1{p^2}\sum_{i,j}
+\left(\frac{S_{a,ij}-S_{\hat a,ij}}{t_it_j}\right)^2. \tag{7}
+$$
 
-## What must be measured next
+The auxiliary terms were added with unit coefficients as a fixed exploratory design. They were not derived from a common likelihood, and the relative scales were not estimated from independent mineralogical observations. The score can diagnose whether the reconstructed assay distribution retains selected characteristics of the measured chemistry, but it cannot independently confirm the reconstructed mineralogy. In fact, if the reconstructed assay equals the observation for every training specimen, all three auxiliary terms are already zero: the assay means, covariances and empirical histograms must then agree. The auxiliary terms chiefly change the trade-off when exact per-specimen matching is not obtained.
 
-A realistic EMC likelihood needs measurements on a stated basis. XRF or ICP chemistry may report elements or oxides, total Fe or an oxidation-specific quantity, dry or as-received mass, and values affected by digestion, fusion, dilution or loss on ignition. QXRD may report crystalline phases normalized within an identified inventory; amorphous material and detection behavior require explicit treatment. A surface, area or volume mineral percentage cannot be inserted into a whole-sample mass-fraction comparison merely by changing the label. Density conversion is defensible only for representative volume fractions, consistent phase inventory and measured densities. Collocated samples are not automatically paired aliquots.
+This limitation is not specific to the histogram method. If two mineral distributions induce the same distribution of observable assays, their assay moments and even their full assay probability laws coincide. No chemical-distribution divergence, including KL divergence, can distinguish them using those observations alone.
 
-The [measurement evidence notes](supplements/evidence-notes.html#measurement-sources) distinguish QXRD bias and variability, analytical error covariance, physical sampling heterogeneity, between-unit geology and varying mineral chemistry. The [bounded data screen summary](supplements/evidence-notes.html#measurement-sources) finds useful published methods and candidate collections but no **verified, ready-to-fit joint raw error dataset within this bounded audit**. Unknown sample keys or failed downloads are recorded as unknown, not absence. Neither the synthetic 0.02 phase SD nor the synthetic covariance should be imported as a laboratory parameter.
+## 3. Sequential mineral allocation and the role of search {#emc-sequential}
 
-The [measurement proposal summary](supplements/measurement-proposal.html) proposes a small, explicitly nested single-domain measurement study before a further inference model. Separate physical splits, preparations and rereads would show which variation belongs to an unchanged instrument preparation and which combines splitting with preparation. Reference mixtures, blanks and near-detection material would probe bias and low-abundance behavior. This is a proposal, not an executed experiment or an available dataset. Twenty-four independent units would remain twenty-four units even if repeated readings multiply the data rows; that modest first tranche could expose problems but would not establish interlaboratory reproducibility or precise high-dimensional covariance.
+A separate hypothesis was motivated by rule-based mineral calculations in which candidate phases are assigned chemical components sequentially. [HSC Geo documentation](https://www.metso.com/globalassets/portfolio/hsc-chemistry/84-geo---mineralogical-calculations-and-mineral-database.pdf) describes staged mineralogical rules and residual chemical accounting, while [Whiten (2008)](https://doi.org/10.1080/08827500701257860) provides the identifiability context. The algorithm implemented here was an original, simplified limiting-component allocator. It was not a reproduction of the full HSC implementation or a model of geological formation sequence.
 
-The [separate proposed design](supplements/measurement-proposal.html) is unexecuted and specifies the nesting and reference requirements. A later Bayesian Part 3 would be reasonable only after measurement bases, pairing, censoring, error covariance and reference uncertainty are documented, with calibration and evaluation kept on genuinely independent units. It should represent uncertainty in mineral chemistry and check prior conflict, especially across domains. Bayesian regularization can express an uncertain preference along a chemical null direction; calling it a posterior does not turn that direction into an observation. The current claim is narrower and useful: bulk assays constrain chemistry, independent calibration can guide a phase split when it transfers, and a phase-sensitive measurement can add information where chemistry is silent. How reliably those pieces work in a particular material remains an empirical measurement question.
+Beginning with nonnegative assay inventory $\mathbf r=\mathbf a$ and remaining whole-sample mass $b=1$, each visited mineral $j$ was allocated the maximum amount compatible with the remaining assay components:
 
-## Evidence and review status
+$$
+\Delta m_j=\min\left\{b,\min_{i:C_{ij}>0}\frac{r_i}{C_{ij}}\right\}. \tag{8}
+$$
 
-This staged article synthesizes frozen exploratory evidence from accepted [PR 4](https://github.com/ClausonGeomet/writing/pull/4) (`d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79`), [PR 5](https://github.com/ClausonGeomet/writing/pull/5) (`e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b`) and [PR 6](https://github.com/ClausonGeomet/writing/pull/6) (`2f172838f8ae3259cbace688551b158447398796`). The [phase report — repository source](https://github.com/ClausonGeomet/writing/blob/2f172838f8ae3259cbace688551b158447398796/research/emc-part2b/phase_sensitive/RESULTS.md) links its retained initial STOP and final internal PASS WITH NOTE: one detailed-key inventory was reconstructed retrospectively, not prospectively. Those reviews are internal and do not constitute external peer review. The retained initial STOP and retrospective inventory qualification are summarized in the [evidence notes](supplements/evidence-notes.html#review-history). Accepted source, numerical tables, figures and review histories remain frozen; this article adds interpretation and a proposed measurement agenda. A <a href="supplements/evidence-notes.html" download="emc-part2-evidence-notes.html">Download evidence notes (HTML)</a> distinguishes source links from locally packaged reading material. The <a href="supplements/measurement-proposal.html" download="emc-part2-measurement-proposal.html">Download measurement proposal summary (HTML)</a> is an unexecuted design summary. The linked records document the exploratory synthetic scope, internal review history, and limits of these findings.
+The algorithm then updates $\mathbf r\leftarrow\mathbf r-C_{:j}\Delta m_j$ and $b\leftarrow b-\Delta m_j$. An early mineral can consume a component needed by a later mineral, so the final allocations depend on the sequence. The rule also depends on nonnegative inputs and fixed nonnegative chemical coefficients. Its limiting ratios are sensitive to small component concentrations and measurement noise.
+
+### A four-mineral illustration
+
+Consider a hypothetical composition of 45% quartz, 15% hematite, 20% kaolinite and 20% forsterite using the same idealised chemical response matrix. The resulting assay is approximately 62.85% SiO$_2$, 15.00% Fe$_2$O$_3$, 7.90% Al$_2$O$_3$ and 11.46% MgO. The limiting-component rule gives different allocations for two sequences:
+
+| Allocation sequence | Quartz | Hematite | Kaolinite | Forsterite |
+|:--|--:|--:|--:|--:|
+| Quartz, hematite, kaolinite, forsterite | 0.6285 | 0.1500 | 0 | 0 |
+| Kaolinite, forsterite, quartz, hematite | 0.4500 | 0.1500 | 0.2000 | 0.2000 |
+
+The first sequence exhausts the available SiO$_2$ by allocating it to quartz. There is subsequently no SiO$_2$ available for kaolinite or forsterite, despite the measured Al$_2$O$_3$ and MgO. The second order recovers the generating mixture in this illustration. The calculation demonstrates order sensitivity in the chosen greedy rule; it is not another independent result from the frozen simulation and does not imply that the true order would be known for a field sample.
+
+### What was optimised by the genetic algorithm?
+
+With four candidate minerals there are $4!=24$ possible complete sequences. This is small enough for exhaustive enumeration, which was included as a reference for the best value of the specified *training score among the 24 orders*. To explore the behaviour of less exhaustive search, I also compared a fixed lexical order, adjacent-swap greedy search, beam search, random search and a genetic algorithm (GA).
+
+A candidate in the GA was a permutation of mineral names. For each permutation, the same sequential allocation rule was applied to the training assays, and its rowwise or distributional chemical reconstruction score was calculated. The GA used six candidate orders, two elites, order crossover, swap mutation probability 0.3, four generations, and seeds 101–103. The non-exhaustive methods had a common proposal cap of 24, with repeated candidate evaluations cached. The selected order was applied unchanged to held-out assays.
+
+Consequently, this GA did not directly optimise mineral abundances in a continuous feasible region, infer a mineralogical distribution or estimate a Bayesian posterior. Its role was narrower: to explore the order dependence of a particular greedy decoder. Nor does an exhaustive minimum of the *chemical training objective* guarantee minimum mineral error when several mineral compositions fit the chemistry.
+
+A related mathematical result came later in the investigation. If the greedy assignment is generalised so that each mineral can take any freely chosen specimen-specific fraction of its currently feasible maximum, then every permutation reaches the same final resource-feasible set, provided chemical coefficients and resources remain fixed and nonnegative. In that setting, allocation order is redundant for a common objective defined on the final mineral masses. Order can become relevant again under fixed greedy assignments, shared-fraction constraints or genuinely path-dependent rules, but those are additional assumptions. The [formal reachability argument](https://github.com/ClausonGeomet/writing/blob/e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b/research/emc-part2b/prior_guided/MATHEMATICAL_DESIGN.md) sets out its conditions. This was a useful clarification of what the order-search experiment could and could not show.
+
+## 4. Synthetic experimental design {#emc-design}
+
+The first study used the public [simCoDaR package](https://github.com/ClausonGeomet/simCoDaR) to generate mineral compositions and the corresponding theoretical chemical assays. The generator was pinned to commit `d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d`. The purpose of simulation was to retain known mineral truth for evaluation while presenting the fitting algorithms with chemistry only. The simulated XRF/XRD-like outputs should not be mistaken for independently measured laboratory assays and mineralogy.
+
+There were six scenarios with three independently generated replicate cohorts per scenario and 60 specimens per cohort: 1,080 synthetic specimens in total. Each cohort was divided into 30 training, 10 validation and 20 held-out test specimens. The four-mineral system was used in five scenarios; the sixth was a three-mineral ambiguity example. The tested departures from an ideal model were designed to isolate different sources of difficulty.
+
+| Scenario | Experimental change | Question examined |
+|:--|:--|:--|
+| Exact, identifiable | Four minerals with the correct fixed response matrix and exact assays | Can the method recover an identifiable mixture? |
+| Chemically ambiguous | Quartz, anatase and rutile, with identical observed TiO$_2$ responses for the latter two | Can mineral proportions remain uncertain despite an exact assay fit? |
+| Noisy assay | Added signed Gaussian assay error to the four-mineral system | How does analytical noise affect recovery and the limiting-component rule? |
+| Omitted phase | Forsterite present in the generating mixture but absent from the fitting inventory | How are unmodelled minerals represented by the residual and unallocated mass? |
+| Incorrect chemistry | Reduced the fitted kaolinite Al$_2$O$_3$ response relative to its generating value | What happens when the chemical response matrix is wrong? |
+| Infeasible chemistry | Inflated the exact assay by 20% | How do methods behave when exact closed mass balance is impossible? |
+
+Part 2A evaluated five mass-balance estimators, producing 5,400 baseline specimen fits. Part 2B evaluated 20 configurations of allocation-search method, training objective and search seed per replicate cohort, giving 360 fitted configurations and 1,080 split-level metric rows. The numerical comparisons reused the same frozen synthetic cohorts and train/validation/test assignments. The order-selection methods saw training assays and the assumed response matrix; generating mineral truth was reserved for retrospective evaluation.
+
+Mineral and assay RMSE were calculated on the held-out specimens. The prespecified exploratory benefit criterion required a mineral-RMSE reduction of at least 0.01 whole-sample mass fraction in two of three matched replicates relative to the designated constrained baseline, with mean assay-RMSE increase no greater than 0.001. This is a descriptive decision rule for the simulation, not a hypothesis test or a universal definition of a meaningful field improvement. Three replicate cohorts cannot provide a general precision or power assessment.
+
+## 5. Results and interpretation {#emc-results}
+
+### Mineral recovery and chemical fit
+
+The following results are mean held-out errors across the three test cohorts (20 specimens each) for the prespecified constrained baseline and the sequential allocator with exhaustive search under the rowwise objective. Entries are whole-sample mass fractions. The full all-seed analysis examines every search method and the separate distribution objective; the table is a readable starting point rather than a favourable subset.
+
+| Scenario | Constrained mineral RMSE | Sequential mineral RMSE | Constrained assay RMSE | Sequential assay RMSE |
+|:--|--:|--:|--:|--:|
+| Exact, identifiable | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
+| Chemically ambiguous | 0.083206 | 0.086836 | 0.000000 | 0.000000 |
+| Noisy assay | 0.008752 | 0.009772 | 0.004316 | 0.004978 |
+| Omitted phase | 0.122035 | 0.122035 | 0.064301 | 0.064301 |
+| Incorrect chemistry | 0.014450 | 0.033874 | 0.005288 | 0.012803 |
+| Infeasible chemistry | 0.081103 | 0.116787 | 0.045520 | 0.063043 |
+
+![Frozen Part 2A/2B test results: mineral RMSE for the prespecified constrained reference and the sequential allocator with exhaustive row-objective order search. Both use the same held-out synthetic specimens.](figures/mineral_rmse_scenarios.svg)
+
+The exact case provided an implementation check: when the response matrix was correct and informative, both classes of method could reproduce the generating composition. In the ambiguous case, both methods reproduced the observed chemistry while retaining appreciable mineral error. The omitted-phase and incorrect-chemistry scenarios produced different kinds of model discrepancy. In the former, the assay demanded material not represented by the fitting mineral list; in the latter, a mineral's assumed chemical contribution was wrong. Neither problem can be fully interpreted from the magnitude of a fitted residual alone.
+
+The order-search exercise did reveal substantial sensitivity to the initial sequence. For the exact case, median mineral-RMSE improvement from a searched order relative to a weak fixed lexical order was about 0.1735. This is a useful finding about the greedy allocator, but it is not a result about new information in the assay: the constrained least-squares baseline was already effectively exact in that case.
+
+Across the saved results, none of the 120 scenario–objective–method–seed comparison groups met the predeclared joint mineral-accuracy and assay-error criterion against the constrained baseline. The 120 groups are related analyses of the same small scenario design, not 120 independent empirical experiments. The observation therefore supports a limited conclusion about these simulation settings and this allocation rule, not a general ranking of optimisation methods.
+
+### Did population-moment and histogram matching change the outcome?
+
+The statistical objective was a genuine part of the experiment, rather than a post hoc interpretation. In addition to rowwise error, it penalised differences between observed and reconstructed assay means, covariances and marginal histogram distributions using equations (5)–(7). This examines whether preserving population summaries changes the order selected on the training data and its behaviour on the held-out set.
+
+Most method/seed combinations produced identical held-out errors under the rowwise and distributional training objectives. The infeasible scenario illustrated a trade-off. Under exhaustive order search, the distribution objective had mineral RMSE 0.080003, compared with 0.116787 for the row objective and 0.081103 for the constrained baseline. But its corresponding assay RMSE rose to 0.097596, compared with 0.063043 for rowwise search and 0.045520 for the baseline. The shift is interesting as an objective-sensitivity result; it did not satisfy the original joint criterion.
+
+The moment and JS terms therefore provided an informative diagnostic of how order selection responds to extra population-level chemical constraints. They did not establish that matching the observed assay distribution identifies the underlying mineral distribution. That question needs independent mineralogical evidence or additional structural assumptions, and the results should not be reinterpreted as tests of a fitted Dirichlet or logistic-normal mineral population model.
+
+### Search behaviour and stochastic variation
+
+The GA results are useful mainly for understanding how the finite search behaved. Against beam search, the joint condition of comparable training score, strictly fewer actual evaluations and shorter measured fit time held in 18 of 54 paired row-objective outcomes and 14 of 54 distribution-objective outcomes. The stricter criterion requiring at least two successful outcomes among three replicate cohorts held in 6 of 18 and 5 of 18 scenario/seed groups, respectively. Against greedy search, the GA recorded no such joint wins. Small absolute runtimes and variation across seeds limit any general inference about computational efficiency.
+
+This analysis neither recommends nor rejects genetic algorithms in general. The practical insight is narrower: with four minerals, there were only 24 possible orders, and the meaning of the optimised objective mattered more to the interpretation than the identity of the search algorithm.
+
+## 6. What moment matching cannot identify {#emc-identifiability}
+
+The simplest example of non-identifiability uses quartz, anatase and rutile, where the last two phases have the same ideal TiO$_2$ chemical response. For measured SiO$_2$ and TiO$_2$,
+
+$$
+C=\begin{bmatrix}1&0&0\\0&1&1\end{bmatrix},
+\qquad
+\mathbf m(t)=\begin{bmatrix}0.60\\t\\0.40-t\end{bmatrix},
+\quad 0\leq t\leq0.40. \tag{9}
+$$
+
+Every value of $t$ produces the assay $\mathbf a=(0.60,0.40)^\mathsf T$. Here $\operatorname{rank}(C)=2$, and adding a closure row does not increase that rank because the closure equation is the sum of the two assay equations. Rank deficiency does not imply every possible boundary sample is non-unique, but this interior example admits a full interval of feasible phase splits. For example, 60% quartz, 25% anatase and 15% rutile gives the same measured assay as 60% quartz, 5% anatase and 35% rutile. The difference vector $\mathbf v=(0,1,-1)^\mathsf T$ satisfies $C\mathbf v=0$ and $\mathbf1^\mathsf T\mathbf v=0$. It changes neither the assayed chemistry nor mineral closure while it remains within the nonnegative bounds.
+
+![The anatase–rutile split can vary over an entire feasible line while the measured SiO2 and TiO2 assay remains fixed. This is an exact algebraic illustration, not a new empirical dataset.](figures/phase_null_direction.png)
+
+The synthetic experiment included 180 paired specimen-level mineral swaps that yielded exactly the same assays. Matching assay means is therefore insufficient; matching covariance is insufficient; matching marginal histograms is insufficient. Even matching the full observed assay probability distribution would be insufficient, because the forward map makes these different mineral compositions observationally equivalent. If $P_a$ and $Q_a$ are identical, their assay KL divergence is zero regardless of how different the underlying mineral distributions are.
+
+The same issue can be expressed in moment terms. Shifting a feasible mean mineral vector by $t\mathbf v$ leaves $C\boldsymbol\mu_m$ unchanged; a feasible change to mineral covariance along $\mathbf v\mathbf v^\mathsf T$ leaves $C\Sigma_m C^\mathsf T$ unchanged because $C\mathbf v=0$. Thus even exact knowledge of the observed first two moments need not identify their mineral counterparts.
+
+This is the crucial statistical limit on the proposed method-of-moments and distribution-matching direction. A larger assay dataset can estimate observable moments more precisely, but cannot recover an unmeasured mineral contrast that lies in the null space of $C$. The next useful question is not simply which discrepancy measure to optimise. It is which additional information, constraint or measurement can justify a choice among the chemically equivalent solutions.
+
+## 7. Follow-up experiments: independent mineralogical information {#emc-followup}
+
+The main synthetic comparison led to two subsequent investigations. They address different questions from the order-search experiment and are reported here as extensions, not extra validation cohorts for Part 2A/B.
+
+### Finite mineralogical calibration
+
+An independent, sparse set of QXRD-like mineral measurements may provide information about the typical abundance and covariance of phases within a geological domain. A separate Quartz–Anatase–Rutile study compared assay-only constrained fitting (A0), a mineralogical centre fitted from independent noisy calibration samples without using the target assay (A1), and assay fitting regularised towards that fitted centre (A2). The last method was a plug-in quadratic regularisation estimator, not a fully calibrated Bayesian posterior. The study used ten synthetic conditions with 50 independent calibration/evaluation cohorts per condition; phase observations remained simulated, not measured in a laboratory.
+
+For a matched variable-quartz condition with 30 calibration specimens, mean held-out mineral mass RMSE was 0.09227 for A0, 0.08454 for A1 and 0.03246 for A2. This illustrated how a relevant mineralogical calibration can guide the unobserved anatase/rutile split while the target assay informs observable chemistry. In a deliberately mismatched calibration condition, however, A2 RMSE increased to 0.17443 versus 0.09208 for A0. The calibration assumption had become misleading. When quartz was fixed and the target assay contained no information about the phase contrast, A1 and A2 were effectively identical.
+
+These results motivate attention to geological population definition, sample independence and prior conflict rather than automatic reliance on a more elaborate regulariser. The [finite-calibration design and results](https://github.com/ClausonGeomet/writing/blob/e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b/research/emc-part2b/prior_guided/FINITE_CALIBRATION_RESULTS.md) contain the complete frozen comparisons.
+
+### Phase-sensitive observations and transfer
+
+The second extension asked whether an observation sensitive to a previously invisible phase contrast adds information that another bulk chemistry measurement cannot. In one synthetic condition, directly measured specimens had mean mineral RMSE of 0.090938 using bulk chemistry, 0.090934 after adding a redundant total-Ti channel and 0.016829 when adding an independent anatase-sensitive channel. Under the assumed simulation error model, the phase measurement observed an additional compositional direction; the redundant total-Ti channel mostly repeated an existing direction.
+
+The study then examined a different estimand: whether measurements purchased on a small pool of specimens improve predictions for separate specimens that receive only bulk assays. With five phase purchases, the mean paired mineral-RMSE improvement relative to purchasing five replicated bulk tests was 0.000292 in an accurate-prior condition and 0.031298 in a prior-mismatch condition. The latter improvement did not eliminate prior harm: phase-updated A2 still had RMSE 0.144813 versus 0.092592 for prior-free A0. These are descriptive results from synthetic cohorts; the direct and independent-unmeasured effects must not be conflated. The [phase-sensitive experimental record](https://github.com/ClausonGeomet/writing/blob/2f172838f8ae3259cbace688551b158447398796/research/emc-part2b/phase_sensitive/RESULTS.md) records the comparison and the limitations of its approximate covariance update.
+
+Together, these experiments support a conditional distinction. Mineralogical observations can provide information absent from the bulk assay, but usefulness for a new specimen depends on whether the calibration population and measurement model transfer to it.
+
+## 8. The missing empirical test {#emc-empirical}
+
+The work remains synthetic. A small number of public data collections were screened for paired whole-rock chemistry and independent mineralogical measurements. None passed the admission requirements for an unexposed, comparable, specimen-level field-validation cohort. The absence of a new empirical benchmark is a limitation of the work, not evidence that the available algorithms have been exhaustively assessed.
+
+The strongest leads included the [CSIRO Fortescue collection](https://data.csiro.au/collection/csiro:6753), which still required review of analytical basis, mineral completeness and independent validation status; a small previously identified Mary–Wildman XRD/XRF set, requiring dry-basis and censoring checks; and the [Cloncurry METAL collection](https://repository.data.auscope.org.au/dataset/cloncurry-metal-multimodal-integrated-mineral-system-characterisation-data), where TIMA volume or surface measurements and surface pXRF could not simply be treated as matched whole-sample mineral mass fractions. The [dataset-screening record](https://github.com/ClausonGeomet/writing/blob/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a/results/dataset_screen.csv) documents these exclusions.
+
+A credible empirical evaluation would need an audited specimen join, consistent analytical and mineral mass bases, a declared phase inventory, treatment of missing/low-abundance phases, mineral chemistry provenance, uncertainty estimates and an untouched grouped evaluation set. Geological domains and the scale of specimen support would need to be recorded. The aim would not be merely to reconstruct chemistry, but to evaluate the accuracy and uncertainty of the mineral quantities needed for a specified geological or metallurgical purpose.
+
+## 9. Statistical questions for the next stage {#emc-next}
+
+The mathematical-statistical direction remains open, but it is more precise after these experiments. One possibility is to model the distribution of mineral compositions explicitly, then propagate it through the chemical response matrix and compare predicted assay moments and distributions with observations. A Dirichlet model on a complete, strictly positive mineral simplex has
+
+$$
+\operatorname E[M_j]=\mu_j=\frac{\alpha_j}{\alpha_0},\qquad
+\operatorname{Var}(M_j)=\frac{\mu_j(1-\mu_j)}{\alpha_0+1},\qquad
+\alpha_0=\sum_j\alpha_j. \tag{10}
+$$
+
+Given independent *observed mineral proportions*, one moment-based concentration estimate from phase $j$ is $\hat\alpha_{0,j}=\bar m_j(1-\bar m_j)/s_j^2-1$, with qualifications about sampling variation and model fit. A Dirichlet family imposes a restricted covariance structure and strictly positive support; it will be unsuitable for some structural-zero, mineral-occurrence and geological mixture problems. A logistic-normal model in isometric log-ratio coordinates permits a richer covariance structure on a positive simplex, while requiring a separate treatment of true absences and censored observations. These are possible modelling directions, not procedures fitted in the completed Part 2A/B study.
+
+A corresponding divergence-based model could compare observed assays with the assay distribution implied by simulated mineral populations, perhaps using KL or JS divergence when probability estimation and support are defensible. Repeated simulation draws could estimate stochastic objective values rather than selecting a favourable draw. However, the chemical null-space remains unchanged: without additional information, a fitted assay distribution need not imply a uniquely recovered mineral distribution. Realistic analytical errors, mineral chemistry variation, calibration uncertainty, geological domain structure and validation on independent phase measurements would have to enter the study design.
+
+A separate, as-yet-unexecuted measurement proposal involves 24 independent physical units, independently prepared splits and rereads for paired mineralogical and bulk chemistry analyses, with reference conditions. Its initial purpose would be to separate components of analytical, preparation and sampling variation, not to claim that repeated readings constitute new independent geological units. The proposed size does not guarantee accurate estimation of a high-dimensional covariance matrix or field-scale predictive uncertainty.
+
+This is also where a future Bayesian measurement model might become useful. Such a model would connect phase occurrence, mineral composition, noisy assays, mineralogical observations and geological variation, while making prior assumptions and uncertainty explicit. Bayesian inference can represent uncertainty in an unidentified direction; it cannot turn that direction into new measured information.
+
+## Conclusion {#emc-conclusion}
+
+The initial investigation was motivated by several possible ways to use chemical data more effectively: constrained mass-balance fitting, sequential limiting-component allocation, search over mineral orders, and comparisons of observed and reconstructed assay distributions. The experiments showed that allocation order can strongly affect a fixed greedy rule, but the order-search methods did not satisfy the prespecified improvement criterion against the constrained mass-balance reference in the six synthetic scenarios. Adding assay-moment and marginal-distribution penalties changed some selected solutions, especially under deliberately infeasible chemistry, without resolving the fundamental distinction between chemical agreement and mineral recovery.
+
+The statistical analysis explains why. Population means, covariance matrices and information-theoretic divergences are useful descriptions of the observed assay data. Their relationship to mineralogy is mediated by the response matrix, its null space and the assumptions made about mineral chemistry and mineral distributions. Better estimation of the observed chemical distribution does not, by itself, identify phase distinctions absent from the measurements.
+
+The subsequent calibration and phase-sensitive experiments illustrate what additional information can contribute, alongside the risk of imposing incorrect geological assumptions. The remaining work is empirical: establish reliable, paired mineralogical and chemical observations on a consistent mass basis, characterise their measurement errors, and test inference across independent geological units. That would provide a stronger foundation for evaluating moment-based, distributional and probabilistic EMC methods than further optimisation of a chemically ambiguous objective alone.
+
+## Research record and scope {#emc-evidence}
+
+The main experiments, their frozen inputs, complete method comparisons and numerical corrections are documented in [Part 2A](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a) and [Part 2B](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2b). The later [finite-calibration](https://github.com/ClausonGeomet/writing/blob/e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b/research/emc-part2b/prior_guided/FINITE_CALIBRATION_RESULTS.md) and [phase-sensitive](https://github.com/ClausonGeomet/writing/blob/2f172838f8ae3259cbace688551b158447398796/research/emc-part2b/phase_sensitive/RESULTS.md) studies were separately designed and reviewed exploratory synthetic experiments. Reviews were internal, not external peer review; retained historical failed checks and a retrospective phase-study inventory correction remain part of the record. No new scientific experiments were run to prepare this article.
+
+For statistical background, see [Lin (1991), *Divergence measures based on the Shannon entropy*](https://doi.org/10.1109/18.61115) for JS divergence and [Minka, *Estimating a Dirichlet distribution*](https://tminka.github.io/papers/dirichlet/minka-dirichlet.pdf) for Dirichlet parameter estimation.
+
