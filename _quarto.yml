@@ -12,7 +12,7 @@ website:
   title: "Clauson Geomet — Blog"
   description: "Technical writing on geometallurgy, mineral inference and defensible decisions by Matt Clauson."
   site-url: "https://clausongeomet.com/writing/"
-  favicon: "https://clausongeomet.com/assets/logo-mark-final.png"
+  favicon: "assets/logo-mark-final.png"
   image: "https://clausongeomet.com/assets/social-preview.png"
   open-graph:
     locale: en_AU
