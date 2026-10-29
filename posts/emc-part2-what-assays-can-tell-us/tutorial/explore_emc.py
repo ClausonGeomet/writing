@@ -71,6 +71,31 @@ def run(directory: Path) -> None:
           {k: round(float(parts[k]), 6) for k in
            ("row", "mean", "covariance", "js", "total")})
 
+    # Stress-test different failure modes on the same independent evaluation rows.
+    # These are teaching perturbations, NOT the frozen six-scenario benchmark.
+    rng = np.random.default_rng(20261029)
+    wrong_C = C.copy()
+    wrong_C[2, 2] *= 0.8   # Fitted kaolinite Al2O3 differs from the generator.
+    conditions = [
+        ("ideal", C, test, "cls_eq"),
+        ("noisy assay", C, test + rng.normal(size=test.shape)
+         * np.array([.010, .008, .003, .006]), "cls_eq"),
+        ("missing forsterite", C[:, :3], test, "cls_le"),
+        ("wrong mineral chemistry", wrong_C, test, "cls_eq"),
+        ("infeasible assay x1.2", C, 1.2 * test, "cls_eq"),
+    ]
+    print("One-cohort exploratory stress checks (not the historical study):")
+    for label, fit_C, observed, method in conditions:
+        fitted = [solve(fit_C, a, method=method) for a in observed]
+        if any(row["status"] != "ok" for row in fitted):
+            raise RuntimeError(f"Fit did not converge: {label}")
+        estimate = np.zeros_like(truth)
+        estimate[:, :fit_C.shape[1]] = np.vstack([row["m"] for row in fitted])
+        fitted_assays = estimate[:, :fit_C.shape[1]] @ fit_C.T
+        mineral_rmse = np.sqrt(np.mean((estimate - truth) ** 2))
+        assay_rmse = np.sqrt(np.mean((fitted_assays - observed) ** 2))
+        print(f"  {label:25s} mineral RMSE={mineral_rmse:.6f}; assay RMSE={assay_rmse:.6f}")
+
     # Two distinct mineral populations, exactly the same assay distribution.
     C_qar = np.array([[1., 0., 0.], [0., 1., 1.]])
     M_qar = np.array([[.6, .25, .15], [.5, .1, .4],
