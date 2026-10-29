@@ -53,9 +53,9 @@ This was a methodological exploration, not an attempt to demonstrate the superio
 
 ### How to follow and run this tutorial
 
-The article now alternates theory, code and interpretation. The numerical illustrations use the actual [\`simCoDaR\`](https://github.com/ClausonGeomet/simCoDaR) R interface and the frozen Python functions used in the Part 2A/B experiments. The complete example is available as [a reproducible source folder](tutorial/README.md), with [R generation](tutorial/generate_data.R), [Python analysis](tutorial/explore_emc.py) and the unmodified [baseline](tutorial/baselines.py) and [order-search](tutorial/emc_prototypes.py) modules.
+The article now alternates theory, code and interpretation. The numerical illustrations use the actual [`simCoDaR`](https://github.com/ClausonGeomet/simCoDaR) R interface and the frozen Python functions used in the Part 2A/B experiments. The complete example is available as [a reproducible source folder](tutorial/README.md), with [R generation](tutorial/generate_data.R), [Python analysis](tutorial/explore_emc.py) and the unmodified [baseline](tutorial/baselines.py) and [order-search](tutorial/emc_prototypes.py) modules.
 
-The code forms one small, independently generated teaching cohort (60 specimens), not a rerun of the full six-scenario study. R creates \`emc_data.csv\` and \`emc_C.csv\`; subsequent Python examples use those files. No synthetic mineral truth is given to the fitting or order-selection algorithms. Download all files by cloning the [writing repository](https://github.com/ClausonGeomet/writing), or follow the [step-by-step setup](tutorial/README.md).
+The code forms one small, independently generated teaching cohort (60 specimens), not a rerun of the full six-scenario study. R creates `emc_data.csv` and `emc_C.csv`; subsequent Python examples use those files. No synthetic mineral truth is given to the fitting or order-selection algorithms. Download all files by cloning the [writing repository](https://github.com/ClausonGeomet/writing), or follow the [step-by-step setup](tutorial/README.md).
 
 ## 1. From a chemical balance to a mineral estimate {#emc-forward}
 
@@ -80,22 +80,22 @@ These coefficients are drawn from the [frozen simulation fixture](https://github
 
 ### Generate mineral compositions and assays with simCoDaR (R)
 
-I generated the synthetic mineral truth using \`simCoDaR\`, my open-source R package for compositional simulation. Domain centres below are hypothetical compositions, not estimates from an ore deposit. The simulator varies positive mineral proportions in log-ratio coordinates and converts the resulting mineral fractions to theoretical oxide assays using fixed mineral formulae.
+I generated the synthetic mineral truth using `simCoDaR`, my open-source R package for compositional simulation. Domain centres below are hypothetical compositions, not estimates from an ore deposit. The simulator varies positive mineral proportions in log-ratio coordinates and converts the resulting mineral fractions to theoretical oxide assays using fixed mineral formulae.
 
 Install the exact package revision used for the research (R 4.0 or newer):
 
-\`\`\`r
+```r
 install.packages("remotes")
 remotes::install_github(
   "ClausonGeomet/simCoDaR",
   ref = "d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d",
   upgrade = "never"
 )
-\`\`\`
+```
 
 The core calculation is deliberately explicit:
 
-\`\`\`r
+```r
 library(simCoDaR)
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 centres <- rbind(
@@ -118,9 +118,9 @@ chem <- minerals_to_assay(pure, library=mineral_assay_library(),
 C <- t(as.matrix(chem$oxides_reported[, channels, drop=FALSE]))/100
 stopifnot(max(abs(rowSums(M)-1)) < 1e-10)
 stopifnot(max(abs(M %*% t(C)-A)) < 1e-10)
-\`\`\`
+```
 
-Here \`M\` is known simulated mineral truth; \`A\` contains theoretical oxide-equivalent mass fractions; and \`C\` is the fixed chemical response. The last line tests the forward mass balance rather than assuming it. These are idealised compositional and chemical observations, not XRD or XRF laboratory measurements. The [complete R script](tutorial/generate_data.R) writes the two CSV files consumed below; the exact package revision and RNG policy are part of the reproducibility record.
+Here `M` is known simulated mineral truth; `A` contains theoretical oxide-equivalent mass fractions; and `C` is the fixed chemical response. The last line tests the forward mass balance rather than assuming it. These are idealised compositional and chemical observations, not XRD or XRF laboratory measurements. The [complete R script](tutorial/generate_data.R) writes the two CSV files consumed below; the exact package revision and RNG policy are part of the reproducibility record.
 
 ### Constrained least squares
 
@@ -137,9 +137,9 @@ Weighted residuals and closure encode different sources of information. Measurem
 
 ### Estimate mineral abundances with the original Python solver
 
-The frozen research implementation contains [\`solve()\`](tutorial/baselines.py), using SciPy NNLS or SLSQP according to the specified method. The following calculates an equality-closed estimate for an assay row and checks that the returned estimate and reconstructed chemistry are consistent:
+The frozen research implementation contains [`solve()`](tutorial/baselines.py), using SciPy NNLS or SLSQP according to the specified method. The following calculates an equality-closed estimate for an assay row and checks that the returned estimate and reconstructed chemistry are consistent:
 
-\`\`\`python
+```python
 import numpy as np
 import pandas as pd
 from baselines import solve   # Downloaded frozen Part 2A source
@@ -157,9 +157,9 @@ assert fit["status"] == "ok"
 print("Estimated mineral mass fractions:", fit["m"])
 print("Reconstructed oxide assays:", C @ fit["m"])
 print("Observed oxide assays:", A[0])
-\`\`\`
+```
 
-The constrained solver is minimising a chemical residual, subject to nonnegative masses and closure. It has no access to \`M_truth\`; the synthetic truth is saved only to evaluate whether a chemically plausible answer is actually mineralogically accurate. The full experiment used the additional pseudoinverse, NNLS, weighted-NNLS and partial-closure variants. Their exact implementation, including solver tolerances and legacy residual-sign convention, is retained in the [frozen source](tutorial/baselines.py).
+The constrained solver is minimising a chemical residual, subject to nonnegative masses and closure. It has no access to `M_truth`; the synthetic truth is saved only to evaluate whether a chemically plausible answer is actually mineralogically accurate. The full experiment used the additional pseudoinverse, NNLS, weighted-NNLS and partial-closure variants. Their exact implementation, including solver tolerances and legacy residual-sign convention, is retained in the [frozen source](tutorial/baselines.py).
 
 ## 2. Statistical information at the specimen and population scales {#emc-distributions}
 
@@ -185,9 +185,9 @@ The completed experiments did not fit a standalone method-of-moments estimator f
 
 ### Calculate the first two moments (Python)
 
-Equation (3) can be verified with the synthetic generator because it retains mineral truth. Using the same \`A\`, \`M_truth\` and \`C\` defined above:
+Equation (3) can be verified with the synthetic generator because it retains mineral truth. Using the same `A`, `M_truth` and `C` defined above:
 
-\`\`\`python
+```python
 mean_assay = A.mean(axis=0)
 mean_from_minerals = C @ M_truth.mean(axis=0)
 cov_assay = np.cov(A, rowvar=False)
@@ -199,9 +199,9 @@ print("Maximum covariance discrepancy:",
       np.max(np.abs(cov_assay - cov_from_minerals)))
 np.testing.assert_allclose(mean_assay, mean_from_minerals, atol=1e-10)
 np.testing.assert_allclose(cov_assay, cov_from_minerals, atol=1e-10)
-\`\`\`
+```
 
-These small differences verify the *forward* identities with fixed \`C\` and no added analytical noise. They do not estimate an unknown mineral population from assay moments. A latent mineral moment model would have to address the inverse identifiability problem and an appropriate measurement-error covariance.
+These small differences verify the *forward* identities with fixed `C` and no added analytical noise. They do not estimate an unknown mineral population from assay moments. A latent mineral moment model would have to address the inverse identifiability problem and an appropriate measurement-error covariance.
 
 ### KL divergence and the distributional criterion
 
@@ -241,9 +241,9 @@ This limitation is not specific to the histogram method. If two mineral distribu
 
 ### Compute the distributional score used in the experiments (Python)
 
-The [frozen \`score_assays()\` function](tutorial/emc_prototypes.py) calculates the rowwise squared residual, the two moment penalties and the marginal histogram JS divergence. This example deliberately perturbs the theoretical assays to make the score components visible; it is a scoring demonstration, not a mineral estimate:
+The [frozen `score_assays()` function](tutorial/emc_prototypes.py) calculates the rowwise squared residual, the two moment penalties and the marginal histogram JS divergence. This example deliberately perturbs the theoretical assays to make the score components visible; it is a scoring demonstration, not a mineral estimate:
 
-\`\`\`python
+```python
 from emc_prototypes import score_assays
 
 A_hat_demo = 0.98 * A
@@ -256,9 +256,9 @@ assert np.isclose(
     components["total"],
     sum(components[k] for k in ["row", "mean", "covariance", "js"])
 )
-\`\`\`
+```
 
-Inside that function, the marginal histograms use fixed edges at 0, 1/8, …, 1 and open outer bins, and JS divergence uses natural logarithms. The objective is a sum of exploration-stage penalties on **observable assays**; it is not an estimated mineral posterior or a KL fit to a latent mineral distribution. To examine the exact implementation of the KL terms, see [the source of \`score_assays()\`](tutorial/emc_prototypes.py).
+Inside that function, the marginal histograms use fixed edges at 0, 1/8, …, 1 and open outer bins, and JS divergence uses natural logarithms. The objective is a sum of exploration-stage penalties on **observable assays**; it is not an estimated mineral posterior or a KL fit to a latent mineral distribution. To examine the exact implementation of the KL terms, see [the source of `score_assays()`](tutorial/emc_prototypes.py).
 
 ## 3. Sequential mineral allocation and the role of search {#emc-sequential}
 
@@ -285,9 +285,9 @@ The first sequence exhausts the available SiO$_2$ by allocating it to quartz. Th
 
 ### Reproduce the order-dependence example (Python)
 
-Here the same generated response matrix and one declared mineral composition are used for both orders. The implementation is the actual frozen [\`allocate()\`](tutorial/emc_prototypes.py), rather than a simplified graphic:
+Here the same generated response matrix and one declared mineral composition are used for both orders. The implementation is the actual frozen [`allocate()`](tutorial/emc_prototypes.py), rather than a simplified graphic:
 
-\`\`\`python
+```python
 from emc_prototypes import allocate
 
 m_example = np.array([.45, .15, .20, .20])
@@ -296,7 +296,7 @@ q_first = allocate(C, a_example, order=(0, 1, 2, 3))
 silicates_first = allocate(C, a_example, order=(2, 3, 0, 1))
 print("Quartz first:    ", np.round(q_first["m"], 4))
 print("Silicates first:", np.round(silicates_first["m"], 4))
-\`\`\`
+```
 
 The ordering tuples refer to quartz, hematite, kaolinite and forsterite, respectively. This isolates the mechanism of the greedy allocation. The first result is not a false observation; it is an intentionally order-sensitive estimate from the same exact synthetic assay.
 
@@ -312,9 +312,9 @@ A related mathematical result came later in the investigation. If the greedy ass
 
 ### Compare exhaustive order enumeration and the implemented GA (Python)
 
-For the four-mineral example, all 24 permutations can be enumerated. The frozen [\`fit_order()\`](tutorial/emc_prototypes.py) also implements the GA with the same crossover, mutation, seed and proposal budget as the research pilot:
+For the four-mineral example, all 24 permutations can be enumerated. The frozen [`fit_order()`](tutorial/emc_prototypes.py) also implements the GA with the same crossover, mutation, seed and proposal budget as the research pilot:
 
-\`\`\`python
+```python
 from emc_prototypes import fit_order, predict_order
 
 train, validation, test = A[:30], A[30:40], A[40:]
@@ -328,7 +328,7 @@ print("Exhaustive:", exhaustive["order"], exhaustive["train_score"])
 print("GA:        ", ga["order"], ga["train_score"])
 print("GA evaluations / proposals:", ga["evaluations"], ga["proposals"])
 assert exhaustive["train_score"] <= ga["train_score"] + 1e-10
-\`\`\`
+```
 
 The search uses *only the training assays*. The held-out mineral RMSE, which is printed by the [complete Python tutorial](tutorial/explore_emc.py), is evaluated afterwards against simulated truth. An exhaustive order score is the best chemical training score in a set of 24 **greedy sequences**, not an oracle for mineral truth or for the continuous constrained solution.
 
@@ -353,15 +353,15 @@ Mineral and assay RMSE were calculated on the held-out specimens. The prespecifi
 
 ### Reproduce the full teaching example
 
-Download the six files from the [tutorial folder](tutorial/README.md), or clone the [GitHub writing repository](https://github.com/ClausonGeomet/writing) and open \`posts/emc-part2-what-assays-can-tell-us/tutorial/\`. After installing pinned [\`simCoDaR\`](https://github.com/ClausonGeomet/simCoDaR) in R and the Python dependencies from [\`requirements.txt\`](tutorial/requirements.txt), run:
+Download the six files from the [tutorial folder](tutorial/README.md), or clone the [GitHub writing repository](https://github.com/ClausonGeomet/writing) and open `posts/emc-part2-what-assays-can-tell-us/tutorial/`. After installing pinned [`simCoDaR`](https://github.com/ClausonGeomet/simCoDaR) in R and the Python dependencies from [`requirements.txt`](tutorial/requirements.txt), run:
 
-\`\`\`bash
+```bash
 Rscript generate_data.R .
 python -m pip install -r requirements.txt
 python explore_emc.py .
-\`\`\`
+```
 
-The scripts print forward mass-balance and moment checks, both greedy allocations, held-out errors for the baseline and two order-search methods, the distribution score components and the chemical null-space counterexample. The source files are [\`generate_data.R\`](tutorial/generate_data.R), [\`explore_emc.py\`](tutorial/explore_emc.py), [\`baselines.py\`](tutorial/baselines.py) and [\`emc_prototypes.py\`](tutorial/emc_prototypes.py). The first two are a compact tutorial; the last two are byte-for-byte copies of the original research functions.
+The scripts print forward mass-balance and moment checks, both greedy allocations, held-out errors for the baseline and two order-search methods, the distribution score components and the chemical null-space counterexample. The source files are [`generate_data.R`](tutorial/generate_data.R), [`explore_emc.py`](tutorial/explore_emc.py), [`baselines.py`](tutorial/baselines.py) and [`emc_prototypes.py`](tutorial/emc_prototypes.py). The first two are a compact tutorial; the last two are byte-for-byte copies of the original research functions.
 
 This is intentionally **not** the complete six-scenario benchmark or a new validated study. For the frozen 1,080-specimen design and its saved comparisons, see the [Part 2A](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a) and [Part 2B](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2b) source and output manifests. The teaching example is a way to inspect the mechanism, not to replace the full audit.
 
@@ -427,7 +427,7 @@ This is the crucial statistical limit on the proposed method-of-moments and dist
 
 The three-mineral counterexample is short enough to run directly. Two different mineral populations, produced by interchanging anatase and rutile, give the same assay rows:
 
-\`\`\`python
+```python
 C_qar = np.array([[1., 0., 0.], [0., 1., 1.]])
 M_qar = np.array([
     [.60, .25, .15], [.50, .10, .40],
@@ -441,7 +441,7 @@ same_assays = score_assays(
     A_original, A_swapped, objective="distribution"
 )
 print("Assay distribution JS:", same_assays["js"])  # exactly zero
-\`\`\`
+```
 
 The second mineral population is different, but **all observable assay rows** are identical. Consequently their empirical means, covariances and marginal histograms—and every assay-only JS or KL comparison under a common measure—are identical. Additional optimisation cannot infer which polymorph was present without new information.
 
