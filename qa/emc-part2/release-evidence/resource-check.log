@@ -1,0 +1,90 @@
+{
+  "file_count": 34,
+  "html_count": 6,
+  "local_refs": 796,
+  "missing": [],
+  "bad_fragments": [],
+  "external_refs": 89,
+  "http_all_ok": true,
+  "candidate_files": [
+    "posts/emc-part2-what-assays-can-tell-us/figures/ambiguous_swap.png",
+    "posts/emc-part2-what-assays-can-tell-us/figures/direct_vs_transfer.png",
+    "posts/emc-part2-what-assays-can-tell-us/index.html",
+    "posts/emc-part2-what-assays-can-tell-us/publication.css",
+    "posts/emc-part2-what-assays-can-tell-us/supplements/evidence-notes.html",
+    "posts/emc-part2-what-assays-can-tell-us/supplements/measurement-proposal.html"
+  ],
+  "forbidden_output_paths": [],
+  "source_permalink_checks": [
+    {
+      "commit": "d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79",
+      "path": "research/emc-part2a/RESEARCH_FINDINGS.md",
+      "valid_local_git_object": true
+    },
+    {
+      "commit": "d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79",
+      "path": "research/emc-part2a/MATHEMATICAL_DESIGN.md",
+      "valid_local_git_object": true
+    },
+    {
+      "commit": "d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79",
+      "path": "research/emc-part2a/CONTRACT_DEVIATIONS.md",
+      "valid_local_git_object": true
+    },
+    {
+      "commit": "d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79",
+      "path": "research/emc-part2b/ALL_SEED_ANALYSIS.md",
+      "valid_local_git_object": true
+    },
+    {
+      "commit": "e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b",
+      "path": "research/emc-part2b/prior_guided/MATHEMATICAL_DESIGN.md",
+      "valid_local_git_object": true
+    },
+    {
+      "commit": "e460bea3d2e12d621dbe51887cb1bf9c1ab42f4b",
+      "path": "research/emc-part2b/prior_guided/FINITE_CALIBRATION_RESULTS.md",
+      "valid_local_git_object": true
+    },
+    {
+      "commit": "2f172838f8ae3259cbace688551b158447398796",
+      "path": "research/emc-part2b/phase_sensitive/RESULTS.md",
+      "valid_local_git_object": true
+    },
+    {
+      "commit": "2f172838f8ae3259cbace688551b158447398796",
+      "path": "research/emc-part2b/phase_sensitive/RESULTS.md",
+      "valid_local_git_object": true
+    },
+    {
+      "commit": "2f172838f8ae3259cbace688551b158447398796",
+      "path": "research/emc-part2b/phase_sensitive/RESULTS.md",
+      "valid_local_git_object": true
+    }
+  ],
+  "local_research_relative_links": [],
+  "guard": {
+    "guard_files": 29,
+    "candidate_files": [
+      "posts/emc-part2-what-assays-can-tell-us/index.html"
+    ],
+    "guard_stub_bytes": 90,
+    "guard_index_counts": {
+      "index.html": 0,
+      "index.xml": 0,
+      "search.json": 0,
+      "sitemap.xml": 0,
+      "listings.json": 0
+    },
+    "release_index_counts": {
+      "index.html": 3,
+      "index.xml": 4,
+      "search.json": 16,
+      "sitemap.xml": 1,
+      "listings.json": 1
+    },
+    "guard_no_supplements": true,
+    "no_global_resources_glob": true
+  },
+  "http_port": 39343
+}

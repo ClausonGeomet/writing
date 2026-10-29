@@ -1,0 +1,16 @@
+/* Scoped to the staged article; supplements carry their own small standalone styles. */
+body:has(.quarto-title-block) #quarto-content .page-columns {min-width:0}
+#quarto-content main.content img {max-width:100%;height:auto}
+#quarto-content main.content .cell-output-display,
+#quarto-content main.content .quarto-figure,
+#quarto-content main.content .math.display {max-width:100%;overflow-x:auto}
+#quarto-content main.content table {display:block;max-width:100%;overflow-x:auto;border-collapse:collapse}
+#quarto-content main.content th,#quarto-content main.content td {white-space:normal;min-width:8rem}
+#quarto-content main.content a:focus-visible {outline:3px solid #07548b;outline-offset:2px}
+#quarto-content main.content .article-mobile-outline {display:none}
+@media (max-width: 991.98px) {
+  #quarto-content main.content .article-mobile-outline {display:block;max-width:100%;margin:1rem 0 1.5rem;padding:.6rem .8rem;border:1px solid #aab4bc;border-radius:.25rem}
+  #quarto-content main.content .article-mobile-outline summary {cursor:pointer;font-weight:600}
+  #quarto-content main.content .article-mobile-outline ol {margin:.65rem 0 0;padding-left:1.3rem}
+  #quarto-content main.content .article-mobile-outline li {margin:.3rem 0;overflow-wrap:anywhere}
+}

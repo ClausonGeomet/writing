@@ -1,0 +1,99 @@
+{
+  "base": "http://127.0.0.1:36013",
+  "viewports": [
+    {
+      "innerWidth": 320,
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "dpr": 1,
+      "mathSource": 11,
+      "mathRendered": 11,
+      "bodyHeight": 20697,
+      "tableCount": 1,
+      "tocCount": 2,
+      "outlineCount": 9,
+      "favicon": "../../assets/logo-mark-final.png",
+      "width": 320,
+      "http_status": 200,
+      "title": "Element-to-mineral conversion, Part 2: what the assays can tell us \u2013 Clauson Geomet \u2014 Blog"
+    },
+    {
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "dpr": 1,
+      "mathSource": 11,
+      "mathRendered": 11,
+      "bodyHeight": 16768,
+      "tableCount": 1,
+      "tocCount": 2,
+      "outlineCount": 9,
+      "favicon": "../../assets/logo-mark-final.png",
+      "width": 390,
+      "http_status": 200,
+      "title": "Element-to-mineral conversion, Part 2: what the assays can tell us \u2013 Clauson Geomet \u2014 Blog"
+    },
+    {
+      "innerWidth": 768,
+      "clientWidth": 768,
+      "scrollWidth": 768,
+      "dpr": 1,
+      "mathSource": 11,
+      "mathRendered": 11,
+      "bodyHeight": 12321,
+      "tableCount": 1,
+      "tocCount": 2,
+      "outlineCount": 9,
+      "favicon": "../../assets/logo-mark-final.png",
+      "width": 768,
+      "http_status": 200,
+      "title": "Element-to-mineral conversion, Part 2: what the assays can tell us \u2013 Clauson Geomet \u2014 Blog"
+    },
+    {
+      "innerWidth": 1440,
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "dpr": 1,
+      "mathSource": 11,
+      "mathRendered": 11,
+      "bodyHeight": 9290,
+      "tableCount": 1,
+      "tocCount": 2,
+      "outlineCount": 9,
+      "favicon": "../../assets/logo-mark-final.png",
+      "width": 1440,
+      "http_status": 200,
+      "title": "Element-to-mineral conversion, Part 2: what the assays can tell us \u2013 Clauson Geomet \u2014 Blog",
+      "toc_visible": true,
+      "table_horizontal_overflow": [
+        {
+          "scroll": 799,
+          "client": 799,
+          "parentScroll": 799,
+          "parentClient": 799
+        }
+      ]
+    }
+  ],
+  "downloads": [
+    {
+      "label": "evidence-notes",
+      "suggested_filename": "emc-part2-evidence-notes.html",
+      "failure": null
+    },
+    {
+      "label": "measurement-proposal",
+      "suggested_filename": "emc-part2-measurement-proposal.html",
+      "failure": null
+    }
+  ],
+  "browser_errors": [],
+  "analytics_intercepted": 4,
+  "chromium_version": "153.0.8010.12",
+  "playwright_version": "1.63.0",
+  "flags": [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage"
+  ]
+}
