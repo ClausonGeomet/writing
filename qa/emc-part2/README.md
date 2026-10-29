@@ -1,6 +1,6 @@
 # EMC Part 2 publication release QA
 
-This directory preserves the fresh technical check of the **local publication candidate**. It is a repository QA record, outside Quarto's site render; it is not a dataset, a scientific run, external peer review, or a deployment record. The independent final review of the complete release diff remains pending.
+This directory preserves the fresh technical check of the **local publication candidate**. It is a repository QA record, outside Quarto's site render; it is not a dataset, a scientific run, external peer review, or a deployment record. The independent [final release review](FINAL_REVIEW.md) records **PASS WITH NOTE** for reviewed metadata HEAD `69ce8694abe7630f1b2f6669c0a6c850509a7c85`. The browser-tested core remains `c1baad3b3cce1539643b10882421cb7e4348e8ef`; this later QA copy and status update are administrative metadata, not a new browser test.
 
 ## Release boundary
 
@@ -29,6 +29,6 @@ The fresh browser check used Chromium at 320, 390, 768, and 1440 CSS pixels: 11 
 
 The [resource inventory](release-evidence/resource-inventory.json) and [resource check log](release-evidence/resource-check.log) record 34/34 site files served with correct HTTP status, MIME, and SHA-256, 796 local references with zero missing paths or bad fragments, and the article CSS, figures, and two named supplement downloads. A separate draft true guard produced only a 90 byte article stub, zero supplement files, and zero slug hits in home, feed, search, sitemap, and listings. No broad resource glob or QA output was deployed. The article's full GitHub source permalinks remain unchanged; the inventory checked their commit and path objects. The [verification script](release-evidence/verify_release.py) and [browser script](release-evidence/browser_check.py) are retained as reproducibility records.
 
-The article interprets frozen **synthetic and exploratory** studies, with internal review qualifications including a retained initial STOP and retrospective inventory issue. The linked measurement study is **proposed and unexecuted**. No scientific code or experiment ran in this release QA. This technical PASS is not a new scientific signoff. Final release scope review still follows; no merge or deployment has occurred.
+The article interprets frozen **synthetic and exploratory** studies, with internal review qualifications including a retained initial STOP and retrospective inventory issue. The linked measurement study is **proposed and unexecuted**. No scientific code or experiment ran in this release QA. This technical PASS is not a new scientific signoff. The [final release scope review](FINAL_REVIEW.md) passed with the disclosed warning note. No push, PR, merge, or deployment has occurred at this documentation step.
 
 [Original evidence manifest](release-evidence/manifest.json) indexes the source proof set. [Copy manifest](COPY_MANIFEST.json) records every packaged source and destination, size, SHA-256, and byte equality. The logs, JSON, scripts, and five PNGs are QA files only; no site build tree, browser profile, secret, user data, raw dataset, archive, or original draft copy is included.
