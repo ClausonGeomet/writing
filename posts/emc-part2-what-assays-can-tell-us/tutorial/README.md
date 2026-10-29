@@ -24,6 +24,16 @@ Python >= 3.10:
 python -m pip install -r requirements.txt
 ```
 
+If the GitHub API installation is unavailable, install the same commit from a
+source checkout instead (this is the method successfully tested in CI):
+
+```sh
+git clone https://github.com/ClausonGeomet/simCoDaR.git
+git -C simCoDaR checkout d9a0b27676a0cb3a4acb300a3f6b2ebc845d205d
+Rscript -e 'install.packages("withr", repos="https://cloud.r-project.org")'
+R CMD INSTALL simCoDaR
+```
+
 ## 2. Run the example
 
 Run commands from the directory containing the downloaded tutorial scripts:

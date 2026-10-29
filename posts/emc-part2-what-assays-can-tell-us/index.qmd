@@ -93,6 +93,8 @@ remotes::install_github(
 )
 ```
 
+If the GitHub API installation is unavailable, the [tutorial setup instructions](tutorial/README.md) include the source-checkout method that passed the CI reproduction test.
+
 The core calculation is deliberately explicit:
 
 ```r
@@ -258,7 +260,7 @@ assert np.isclose(
 )
 ```
 
-Inside that function, the marginal histograms use fixed edges at 0, 1/8, …, 1 and open outer bins, and JS divergence uses natural logarithms. The objective is a sum of exploration-stage penalties on **observable assays**; it is not an estimated mineral posterior or a KL fit to a latent mineral distribution. To examine the exact implementation of the KL terms, see [the source of `score_assays()`](tutorial/emc_prototypes.py).
+Inside that function, the marginal histograms use fixed edges at 0, 1/8, …, 1 and open outer bins, and JS divergence uses natural logarithms. The objective is a sum of exploration-stage penalties on observable assays; it is not an estimated mineral posterior or a KL fit to a latent mineral distribution. To examine the exact implementation of the KL terms, see [the source of `score_assays()`](tutorial/emc_prototypes.py).
 
 ## 3. Sequential mineral allocation and the role of search {#emc-sequential}
 
@@ -389,7 +391,7 @@ python explore_emc.py .
 
 The scripts print forward mass-balance and moment checks, both greedy allocations, held-out errors for the baseline and two order-search methods, the distribution score components and the chemical null-space counterexample. The source files are [`generate_data.R`](tutorial/generate_data.R), [`explore_emc.py`](tutorial/explore_emc.py), [`baselines.py`](tutorial/baselines.py) and [`emc_prototypes.py`](tutorial/emc_prototypes.py). The first two are a compact tutorial; the last two are byte-for-byte copies of the original research functions.
 
-This is intentionally **not** the complete six-scenario benchmark or a new validated study. For the frozen 1,080-specimen design and its saved comparisons, see the [Part 2A](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a) and [Part 2B](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2b) source and output manifests. The teaching example is a way to inspect the mechanism, not to replace the full audit.
+This is intentionally not the complete six-scenario benchmark or a new validated study. For the frozen 1,080-specimen design and its saved comparisons, see the [Part 2A](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2a) and [Part 2B](https://github.com/ClausonGeomet/writing/tree/d2f69fe3b4375a4a3dd03ea1ac2cb40149ee8b79/research/emc-part2b) source and output manifests. The teaching example is a way to inspect the mechanism, not to replace the full audit.
 
 ## 5. Results and interpretation {#emc-results}
 
@@ -469,7 +471,7 @@ same_assays = score_assays(
 print("Assay distribution JS:", same_assays["js"])  # exactly zero
 ```
 
-The second mineral population is different, but **all observable assay rows** are identical. Consequently their empirical means, covariances and marginal histograms—and every assay-only JS or KL comparison under a common measure—are identical. Additional optimisation cannot infer which polymorph was present without new information.
+The second mineral population is different, but all observable assay rows are identical. Consequently their empirical means, covariances and marginal histograms—and every assay-only JS or KL comparison under a common measure—are identical. Additional optimisation cannot infer which polymorph was present without new information.
 
 ## 7. Follow-up experiments: independent mineralogical information {#emc-followup}
 
