@@ -351,6 +351,32 @@ Part 2A evaluated five mass-balance estimators, producing 5,400 baseline specime
 
 Mineral and assay RMSE were calculated on the held-out specimens. The prespecified exploratory benefit criterion required a mineral-RMSE reduction of at least 0.01 whole-sample mass fraction in two of three matched replicates relative to the designated constrained baseline, with mean assay-RMSE increase no greater than 0.001. This is a descriptive decision rule for the simulation, not a hypothesis test or a universal definition of a meaningful field improvement. Three replicate cohorts cannot provide a general precision or power assessment.
 
+### Stress the assumed mineral model (Python)
+
+An exact, identifiable mineral system is useful for testing a calculation but not sufficient to evaluate a method. Using the same held-out simulated specimens, we can change one modelling assumption at a time: introduce signed assay noise, omit forsterite from the fitted inventory, alter kaolinite chemistry, or increase the assay beyond exact mass-balance feasibility.
+
+```python
+rng = np.random.default_rng(20261029)
+wrong_C = C.copy()
+wrong_C[2, 2] *= 0.8                    # Incorrect fitted kaolinite Al2O3
+conditions = [
+    ("ideal", C, test, "cls_eq"),
+    ("noise", C, test + rng.normal(size=test.shape) *
+        np.array([.010, .008, .003, .006]), "cls_eq"),
+    ("missing phase", C[:, :3], test, "cls_le"),
+    ("wrong chemistry", wrong_C, test, "cls_eq"),
+    ("infeasible", C, 1.2 * test, "cls_eq")
+]
+for label, fit_C, observed, method in conditions:
+    fits = [solve(fit_C, a, method=method) for a in observed]
+    estimates = np.zeros((len(test), 4))
+    estimates[:, :fit_C.shape[1]] = np.array([r["m"] for r in fits])
+    mineral_rmse = np.sqrt(np.mean((estimates - M_truth[40:])**2))
+    print(label, "mineral RMSE:", round(float(mineral_rmse), 5))
+```
+
+The [complete script](tutorial/explore_emc.py) evaluates both mineral and assay RMSE and checks solver status for each condition. These perturbations reuse just **one** teaching cohort, so their output is not the published six-scenario result table, which averages across separate frozen replicates. They illustrate why a small chemical residual cannot by itself validate mineral composition, especially when the phase inventory or chemistry is incorrect.
+
 ### Reproduce the full teaching example
 
 Download the six files from the [tutorial folder](tutorial/README.md), or clone the [GitHub writing repository](https://github.com/ClausonGeomet/writing) and open `posts/emc-part2-what-assays-can-tell-us/tutorial/`. After installing pinned [`simCoDaR`](https://github.com/ClausonGeomet/simCoDaR) in R and the Python dependencies from [`requirements.txt`](tutorial/requirements.txt), run:
