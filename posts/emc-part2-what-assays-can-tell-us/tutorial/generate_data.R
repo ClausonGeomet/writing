@@ -21,7 +21,8 @@ M <- as.matrix(draw$truth$mineral_fraction[, phases, drop = FALSE])
 A <- as.matrix(draw$observed$xrf_oxide_wt_percent[, analytes, drop = FALSE]) / 100
 
 # Pure-mineral responses give the same assumed chemistry as the generator.
-pure <- diag(length(phases), dimnames = list(phases, phases))
+pure <- diag(length(phases))
+dimnames(pure) <- list(phases, phases)
 reported <- minerals_to_assay(pure, library = mineral_assay_library(),
                               basis = "fraction", iron_reporting = "total_Fe2O3")
 C <- t(as.matrix(reported$oxides_reported[, analytes, drop = FALSE])) / 100
