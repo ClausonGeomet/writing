@@ -7,6 +7,7 @@ project:
     - "!drafts/**"
   resources:
     - posts/**/rendered-report.html
+    - posts/emc-part2-what-assays-can-tell-us/tutorial/**
 
 website:
   title: "Clauson Geomet — Blog"
