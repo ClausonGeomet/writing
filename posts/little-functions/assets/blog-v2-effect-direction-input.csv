@@ -1,0 +1,8 @@
+language,method,model_id,dose_token,direction,count,n_supported,n_excluded,effect_unit
+Python,select_lr_ml_rf,SC020-v1-LF03-Python-observed_recovery_pct-select_lr_ml_rf,0.05,Decrease,194,235,21,pp
+Python,select_lr_ml_rf,SC020-v1-LF03-Python-observed_recovery_pct-select_lr_ml_rf,0.05,Increase,37,235,21,pp
+Python,select_lr_ml_rf,SC020-v1-LF03-Python-observed_recovery_pct-select_lr_ml_rf,0.05,Near zero,4,235,21,pp
+Python,stepr_ols,SC020-v1-LF03-Python-observed_recovery_pct-stepr_ols,0.05,Decrease,235,235,21,pp
+R,select_lr_ml_rf,SC020-v1-LF03-R-observed_recovery_pct-select_lr_ml_rf,0.05,Decrease,191,235,21,pp
+R,select_lr_ml_rf,SC020-v1-LF03-R-observed_recovery_pct-select_lr_ml_rf,0.05,Increase,44,235,21,pp
+R,stepr_ols,SC020-v1-LF03-R-observed_recovery_pct-stepr_ols,0.05,Decrease,235,235,21,pp

@@ -8,6 +8,12 @@ project:
   resources:
     - posts/**/rendered-report.html
     - posts/emc-part2-what-assays-can-tell-us/tutorial/**
+    - posts/little-functions/assets/**
+    - posts/little-functions/references/**
+    - posts/little-functions/materials/**
+    - posts/little-functions/examples/**
+    - posts/little-functions/README.md
+    - posts/little-functions/run-examples.sh
 
 website:
   title: "Clauson Geomet — Blog"

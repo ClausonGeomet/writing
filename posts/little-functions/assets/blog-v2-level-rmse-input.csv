@@ -1,0 +1,11 @@
+language,method,model_id,n_heldout,rmse_pp,method_label
+Python,ilr_rf,SC020-v1-LF03-Python-observed_recovery_pct-ilr_rf,256,2.2429008051970207,Four ILR coordinates + forest
+Python,raw_rf,SC020-v1-LF03-Python-observed_recovery_pct-raw_rf,256,2.7980904185743594,Four raw mineral fractions + forest
+Python,select_lr_ml_rf,SC020-v1-LF03-Python-observed_recovery_pct-select_lr_ml_rf,256,1.2266008989101753,Forest-selected ratios + forest
+Python,stepr_ols,SC020-v1-LF03-Python-observed_recovery_pct-stepr_ols,256,4.539492866110104,STEPR ratios + linear regression
+Python,stepr_rf,SC020-v1-LF03-Python-observed_recovery_pct-stepr_rf,256,1.622203599301467,STEPR ratios + forest
+R,ilr_rf,SC020-v1-LF03-R-observed_recovery_pct-ilr_rf,256,2.043839961505763,Four ILR coordinates + forest
+R,raw_rf,SC020-v1-LF03-R-observed_recovery_pct-raw_rf,256,2.431960061007676,Four raw mineral fractions + forest
+R,select_lr_ml_rf,SC020-v1-LF03-R-observed_recovery_pct-select_lr_ml_rf,256,1.2385944541880973,Forest-selected ratios + forest
+R,stepr_ols,SC020-v1-LF03-R-observed_recovery_pct-stepr_ols,256,4.539492866110108,STEPR ratios + linear regression
+R,stepr_rf,SC020-v1-LF03-R-observed_recovery_pct-stepr_rf,256,1.7218917448996687,STEPR ratios + forest
