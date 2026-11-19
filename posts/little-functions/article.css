@@ -1,0 +1,73 @@
+/* Let the article grid shrink to the viewport before wide content scrolls. */
+#quarto-content,
+#quarto-document-content,
+#quarto-document-content > * {
+  min-width: 0;
+}
+
+/* Display mathematics keeps its full size and scrolls within its paragraph. */
+#quarto-document-content p:has(> span[id^="eq-"]) {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+#quarto-document-content pre.sourceCode {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+#quarto-document-content .scroll-math {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Keep the seven-column specimen readable inside its own swipe area. */
+#quarto-document-content .specimen-scroll {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#quarto-document-content .specimen-scroll table {
+  min-width: 650px;
+}
+@media (max-width: 600px) {
+  #quarto-document-content .specimen-scroll::before {
+    content: "Swipe to read all seven columns →";
+    display: block;
+    width: max-content;
+    font-size: 0.85rem;
+    color: #495057;
+    padding-bottom: 0.35rem;
+  }
+}
+
+/* Quarto wraps each table in a figure; constrain the actual table wrapper. */
+#quarto-document-content .quarto-float:has(table),
+#quarto-document-content .quarto-float:has(table) > figure {
+  min-width: 0;
+  max-width: 100%;
+}
+#quarto-document-content .quarto-float:has(table) > figure > div[aria-describedby] {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 600px) {
+  #quarto-document-content .quarto-float:has(table) > figure > div[aria-describedby]::before {
+    content: "Scroll table horizontally to see all columns →";
+    display: block;
+    width: max-content;
+    font-size: 0.85rem;
+    color: #495057;
+    padding-bottom: 0.35rem;
+  }
+}
+#tbl-copper table { min-width: 820px; }
+#tbl-lf01-dose table { min-width: 620px; }

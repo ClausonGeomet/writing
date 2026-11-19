@@ -1,0 +1,9 @@
+response,criterion,nsteps,r_status,python_status,selected_pairs_match,prediction_max_abs_diff,parity_status,error,r_names,python_names
+linear,AIC,1,success,success,True,5.684341886080802e-14,PASS,,Chalcopyrite/Kaolinite,Chalcopyrite/Kaolinite
+linear,AIC,3,success,success,False,2.842170943040401e-14,FAIL,,Chalcopyrite/Kaolinite;Chalcopyrite/Quartz;Pyrite/Quartz,Chalcopyrite/Kaolinite;Chalcopyrite/Quartz;Chalcopyrite/Pyrite
+linear,BIC,1,success,success,True,5.684341886080802e-14,PASS,,Chalcopyrite/Kaolinite,Chalcopyrite/Kaolinite
+linear,BIC,3,success,success,True,2.1316282072803006e-14,PASS,,Chalcopyrite/Kaolinite;Chalcopyrite/Quartz,Chalcopyrite/Kaolinite;Chalcopyrite/Quartz
+nonlinear,AIC,1,success,success,True,7.105427357601002e-14,PASS,,Quartz/Kaolinite,Quartz/Kaolinite
+nonlinear,AIC,3,success,success,False,1.0658141036401503e-13,FAIL,,Quartz/Kaolinite;Chalcocite/Pyrite;Chalcopyrite/Kaolinite,Quartz/Kaolinite;Chalcocite/Pyrite;Chalcopyrite/Quartz
+nonlinear,BIC,1,success,success,True,7.105427357601002e-14,PASS,,Quartz/Kaolinite,Quartz/Kaolinite
+nonlinear,BIC,3,success,success,False,1.0658141036401503e-13,FAIL,,Quartz/Kaolinite;Chalcocite/Pyrite;Chalcopyrite/Kaolinite,Quartz/Kaolinite;Chalcocite/Pyrite;Chalcopyrite/Quartz
